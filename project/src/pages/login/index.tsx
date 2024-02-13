@@ -17,10 +17,9 @@ const  Login=(props)=> {
       console.log(res.data);
       if(res.data.code===0){
         message.success('登录成功');
-        history.push(`/Home`)
+        history.push(`/newhome`)
         localStorage.setItem('login','true')
         dispatch(LoginState('true'))
-        dispatch(HeaderState('Home'))
       }
       else{
         message.error(res.data.msg);

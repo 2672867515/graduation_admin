@@ -12,12 +12,13 @@ import {
 import { UploadOutlined } from '@ant-design/icons';
 
 
-const Home=(props)=> {
+const Used=(props)=> {
   
   return (
-    <div className='mainbox'>
-      
+    <div className='used'>
+
+      东方日升分为如风万人份
     </div>
   )
 }
-export default Home
+export default Used

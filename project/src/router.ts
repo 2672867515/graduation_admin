@@ -1,11 +1,11 @@
 import { lazy } from 'react';
 
-const Home = lazy(() => import('./pages/home/index.tsx')); 
-const Login = lazy(() => import('./pages/login/index.tsx'));
+const Newhome = lazy(() => import('./pages/newhome/index.tsx')); 
+const Used = lazy(() => import('./pages/used/index.tsx')); 
 
 const routes = [
-  { name: '首页', component: Home, path: '/Home' },
-  { name: '登录', component: Login, path: '/Login' }
+  { name: '新房管理', component: Newhome, path: '/Newhome' },
+  { name: '二手房管理', component: Used, path: '/Used' },
 ];
 
 export default routes;
