@@ -1,9 +1,10 @@
 .used{
-    padding-top: 50px;
-    box-sizing: border-box;
     width: 85%;
-    height: 100vh;
+    height: 650px;
     // background-color: antiquewhite;
     position: absolute;
     right: 0;
+    overflow: auto;
+    padding: 5px;
+    box-sizing: border-box;
 }

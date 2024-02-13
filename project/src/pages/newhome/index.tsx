@@ -13,6 +13,7 @@ const Newhome=(props)=> {
   return (
     <div className='newhome'>
       12121212
+      <div className="a" style={{height:'800px'}}>11</div>
     </div>
   )
 }
