@@ -6,13 +6,13 @@ import routes from './router.ts'
 function App() {
   return (
     <div className="App">
-          {/* 注册路由 */}
+      {/* 注册路由 */}
       <Suspense>
         <Switch>
           {routes.map((item,index)=>{
            return <Route path={item.path} key={index} component={item.component} />
           })}
-          <Redirect to="/home" />
+          <Redirect to="/Login" />
         </Switch>
       </Suspense>
     </div>
