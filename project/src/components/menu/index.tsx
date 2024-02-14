@@ -27,7 +27,7 @@ function getItem(
 const items: MenuProps['items'] = [
   getItem('新房管理', '/Newhome',<HomeOutlined />),
   getItem('二手房管理', '/Used',<BankOutlined />),
-  getItem('出租房管理', '3',<ContainerOutlined />),
+  getItem('出租房管理', '/Rent',<ContainerOutlined />),
   getItem('问答管理', '4',<CommentOutlined />),
   getItem('账户管理', '5',<TeamOutlined />),
 ];

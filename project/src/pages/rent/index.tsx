@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-const Used=(props)=> {
+const Rent=(props)=> {
 
 
   const dataSource = [
@@ -66,4 +66,4 @@ const Used=(props)=> {
     </div>
   )
 }
-export default Used
+export default Rent
