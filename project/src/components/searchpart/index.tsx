@@ -2,18 +2,24 @@ import React, { useState } from 'react';
 import './index.scss'
 import { Button, Col, Form, Input, Row } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-const Searchpart=(props)=> {
-  const {type}=props
+interface detail{
+  type:string;
+  callback:(data)=>void
+}
+const Searchpart=React.memo((props:detail)=> {
+  const {type,callback}=props
   const [form] = Form.useForm();
   const [messages,setMessages]=useState({id:'',name:''} )
-  console.log(type);
+  // console.log(type);
 
   const onFinish = (values: any) => {
     console.log('Success:', values);
+    callback(1)
   };
   
   const onFinishFailed = (errorInfo: any) => {
     console.log('meaasgeFailed:', errorInfo);
+    callback('error')
   };
 
   return (
@@ -50,5 +56,5 @@ const Searchpart=(props)=> {
         </Form>
     </div>
   );
-}
+})
 export default Searchpart

@@ -2,7 +2,7 @@ import React,{ useEffect, useState } from 'react';
 import './index.scss'
 import { useDispatch } from 'react-redux';
 import { Button, Form, Input, Menu, Row, type MenuProps, Col, Modal,message, Statistic, Upload } from 'antd';
-import { ContainerOutlined, TeamOutlined,HomeOutlined,CommentOutlined,BankOutlined } from '@ant-design/icons';
+import { ContainerOutlined, TeamOutlined,HomeOutlined,CommentOutlined,BankOutlined,FireOutlined} from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
 import type { UploadProps } from 'antd';
 
@@ -29,6 +29,7 @@ const items: MenuProps['items'] = [
   getItem('二手房管理', '/Used',<BankOutlined />),
   getItem('出租房管理', '/Rent',<ContainerOutlined />),
   getItem('问答管理', '4',<CommentOutlined />),
+  getItem('热门管理', '4',<FireOutlined />),
   getItem('账户管理', '5',<TeamOutlined />),
 ];
 
