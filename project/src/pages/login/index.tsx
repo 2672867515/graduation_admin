@@ -19,7 +19,7 @@ const  Login=(props)=> {
         message.success('登录成功');
         history.push(`/newhome`)
         localStorage.setItem('adminlogin','true')
-
+        localStorage.setItem('adminid',res.data.data.id)
       }
       else{
         message.error(res.data.msg);

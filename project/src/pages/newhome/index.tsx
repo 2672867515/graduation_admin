@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom';
 import './index.scss'
-import { Button, DatePicker, Form, Input, message, Modal, Switch, Table, Upload } from 'antd';
+import { Button, DatePicker, Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select } from 'antd';
 import type { DatePickerProps } from 'antd';
+import type { TabsProps ,UploadProps} from 'antd';
 import { useDispatch } from 'react-redux';
 import moment from 'moment';
 import {
@@ -10,6 +11,8 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
+import { getall } from '../../api/api.ts';
+import TabPane from 'antd/es/tabs/TabPane';
 const Newhome=(props)=> {
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
@@ -20,24 +23,7 @@ const Newhome=(props)=> {
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [detail,setDetail]=useState(false)
-  const [dataSource,setDataSource]=useState([
-    {
-      id: '胡彦斌',
-      name: 32,
-      address: '西湖区湖底公园1号',
-      kp:'2024-01-01',
-      jf:'2024-01-03',
-      ishot:true
-    },
-    {
-      id: '胡彦祖',
-      name: 42,
-      address: '西湖区湖底1wwwwwwwwwwwwwwwwww公园1号',
-      kp:'2024-01-01',
-      jf:'2024-01-05',
-      ishot:false
-    },
-  ])
+  const [dataSource,setDataSource]=useState([])
   const [dataSource2,setDataSource2]=useState([
     {
       id: '胡彦斌',
@@ -117,6 +103,11 @@ const Newhome=(props)=> {
       dataIndex: 'ishot',
       key: 'ishot',
       className: 'column', 
+      render: (t,r) => (
+     
+          t==='true'?<Tag color="cyan">是</Tag>:<Tag color="red">否</Tag>
+    
+        ),
     },
     {
       title: '操作',
@@ -182,9 +173,37 @@ const Newhome=(props)=> {
     },
     
   ];
+  const file: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        message.success(`${info.file.name} 上传成功`);
+        let data={id:1,head:info.file.response}
+        // updateHead('/user/updateHead',data).then(res=>{
+        //   console.log(res);
+        // })
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
   const initialValues = {
     ishot: false, // 设置热门开关的初始值为 false
   };
+  useEffect(()=>{
+    getall('/newhouse/getall').then((res)=>{
+      console.log(res);
+      setDataSource(res.data.data)
+    })
+  },[])
   const handleCallback = (data) => {
     setDetail(false)
     console.log(data);
@@ -222,7 +241,7 @@ const Newhome=(props)=> {
 
   const doedit=(r)=>{
     console.log(r);
-    const data={...r,kp:moment(r.kp),jf:moment(r.jf)}
+    const data={...r,ishot:r.ishot==='true'?true:false,kp:moment(r.kp),jf:moment(r.jf)}
     form2.resetFields()
     
     Object.keys(data).forEach(key => {
@@ -249,7 +268,6 @@ const Newhome=(props)=> {
     setLoading2(true);
     setTimeout(() => {
       setLoading2(false);
-      setIsModalOpen2(false);
       messageApi.open({
         type: 'success',
         content: '编辑成功',
@@ -263,6 +281,12 @@ const Newhome=(props)=> {
   const onFinishFailed2 = (errorInfo: any) => {
     console.log('meaasgeFailed:', errorInfo);
   };
+  const selecthandleChange = (value: string) => {
+    console.log(`selected ${value}`);
+  };
+  const upf=()=>{
+    
+  }
   return (
     <div className='newhome'>
       {contextHolder}
@@ -379,93 +403,117 @@ const Newhome=(props)=> {
         footer={[
           // 注意这里使用的是 Form 组件的 submit 方法
           <Button  onClick={() => handleCancel2()}>
-            取消
+            关闭
           </Button>,
-          <Button key="submit" type="primary" loading={loading2} onClick={() => form2.submit()}>
-            提交
-          </Button>
         ]}
         >
-        <Form
-          form={form2}
-          name="basic"
-          labelCol={{span:4}}
-          wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 500 }}
-          onFinish={onFinish2}
-          onFinishFailed={onFinishFailed2}
-        >
-          
-          <Form.Item
-            label="楼盘名称"
-            name="name"
-            rules={[{ required: true, message: '请输入楼盘名称' }]}
+        <Tabs defaultActiveKey="1">
+          <TabPane tab="基本信息" key="1">
+          <Form
+            form={form2}
+            name="basic"
+            labelCol={{span:4}}
+            wrapperCol={{ span: 16 }}
+            style={{ maxWidth: 500 }}
+            onFinish={onFinish2}
+            onFinishFailed={onFinishFailed2}
           >
-             <Input  placeholder="请输入楼盘名称" />
-          </Form.Item>
-          <Form.Item
-            label="地址"
-            name="address"
-            rules={[{ required: true, message: '请输入地址' }]}
-          >
-             <Input  placeholder="请输入地址" />
-          </Form.Item>
-          <Form.Item
-            label="可选户型"
-            name="housetype"
-            rules={[{ required: true, message: '请输入可选户型' }]}
-          >
-             <Input  placeholder="请输入可选户型" />
-          </Form.Item>
-          <Form.Item
-            label="尺寸范围"
-            name="size"
-            rules={[{ required: true, message: '请输入尺寸范围' }]}
-          >
-             <Input  placeholder="请输入尺寸范围" />
-          </Form.Item>
-          <Form.Item
-            label="均价/万"
-            name="averageprice"
-            rules={[{ required: true, message: '请输入均价' }]}
-          >
-             <Input  placeholder="请输入均价" />
-          </Form.Item>
-          <Form.Item
-            label="开盘时间"
-            name="kp"
-            rules={[{ required: true, message: '请选择开盘时间' }]}
-          >
-            <DatePicker disabled placeholder="请选择开盘时间"  />
-          </Form.Item>
-          <Form.Item
-            label="交房时间"
-            name="jf"
-            rules={[{ required: true, message: '请选择交房时间' }]}
-          >
-             <DatePicker disabled placeholder="请选择交房时间"  />
-          </Form.Item>
-          <Form.Item
-            label="特色"
-            name="feature"
-            rules={[{ required: true, message: '请输入特色' }]}
-          >
-             <Input  placeholder="请输入特色,用 , 隔开" />
-          </Form.Item>
-          <Form.Item
-            label="联系方式"
-            name="phone"
-            rules={[{ required: true, message: '请输入联系方式' }]}
-          >
-             <Input  placeholder="请输入联系方式" />
-          </Form.Item>
-          <Form.Item
-            label="热门"
-            name="ishot"
-          >
-              <Switch checkedChildren="热门" unCheckedChildren="普通" onChange={handleSwitchChange} defaultChecked={false} />
-          </Form.Item>
-        </Form>
+            
+            <Form.Item
+              label="楼盘名称"
+              name="name"
+              rules={[{ required: true, message: '请输入楼盘名称' }]}
+            >
+              <Input  placeholder="请输入楼盘名称" />
+            </Form.Item>
+            <Form.Item
+              label="地址"
+              name="address"
+              rules={[{ required: true, message: '请输入地址' }]}
+            >
+              <Input  placeholder="请输入地址" />
+            </Form.Item>
+            <Form.Item
+              label="可选户型"
+              name="housetype"
+              rules={[{ required: true, message: '请输入可选户型' }]}
+            >
+              <Input  placeholder="请输入可选户型" />
+            </Form.Item>
+            <Form.Item
+              label="尺寸范围"
+              name="size"
+              rules={[{ required: true, message: '请输入尺寸范围' }]}
+            >
+              <Input  placeholder="请输入尺寸范围" />
+            </Form.Item>
+            <Form.Item
+              label="均价/万"
+              name="averageprice"
+              rules={[{ required: true, message: '请输入均价' }]}
+            >
+              <Input  placeholder="请输入均价" />
+            </Form.Item>
+            <Form.Item
+              label="开盘时间"
+              name="kp"
+              rules={[{ required: true, message: '请选择开盘时间' }]}
+            >
+              <DatePicker disabled placeholder="请选择开盘时间"  />
+            </Form.Item>
+            <Form.Item
+              label="交房时间"
+              name="jf"
+              rules={[{ required: true, message: '请选择交房时间' }]}
+            >
+              <DatePicker disabled placeholder="请选择交房时间"  />
+            </Form.Item>
+            <Form.Item
+              label="特色"
+              name="feature"
+              rules={[{ required: true, message: '请输入特色' }]}
+            >
+              <Input  placeholder="请输入特色,用 , 隔开" />
+            </Form.Item>
+            <Form.Item
+              label="联系方式"
+              name="phone"
+              rules={[{ required: true, message: '请输入联系方式' }]}
+            >
+              <Input  placeholder="请输入联系方式" />
+            </Form.Item>
+            <Form.Item
+              label="热门"
+              name="ishot"
+            >
+                <Switch checkedChildren="热门" unCheckedChildren="普通" onChange={handleSwitchChange} defaultChecked={false} />
+            </Form.Item>
+            <Form.Item wrapperCol={{ offset: 10, span: 5 }}>
+              <Button loading={loading2} type="primary" htmlType="submit">
+                提交
+              </Button>
+            </Form.Item>
+          </Form>
+          </TabPane>
+          <TabPane tab="VR素材" key="2">
+            <Select
+              defaultValue="lucy"
+              style={{ width: 120 }}
+              onChange={selecthandleChange}
+              options={[
+                { value: 'living', label: '客厅' },
+                { value: 'mainroom', label: '主卧' },
+                { value: 'secondroom', label: '次卧' },
+                { value: 'washroom', label: '卫生间' },
+              ]}
+            />
+            <br />
+            <img src="" alt="" />
+            <Upload {...file}>
+                  <Button size='small' onClick={upf} icon={<UploadOutlined />}>上传正面</Button>
+            </Upload>
+          </TabPane>
+        </Tabs>
       </Modal>
       </div>
   )
