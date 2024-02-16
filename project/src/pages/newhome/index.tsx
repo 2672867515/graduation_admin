@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { getall } from '../../api/api.ts';
+import { getall, updateVrimage } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
 const Newhome=(props)=> {
   const [messageApi, contextHolder] = message.useMessage();
@@ -20,6 +20,9 @@ const Newhome=(props)=> {
   const [loading2, setLoading2] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [name, setName] = useState('');
+  const [imagetype,setImagetype]=useState('living')
+  const [houseid,setHouseid]=useState()
+  const [direction,setDirection]=useState('')
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [detail,setDetail]=useState(false)
@@ -185,11 +188,15 @@ const Newhome=(props)=> {
         console.log(info.file, info.fileList);
       }
       if (info.file.status === 'done') {
-        message.success(`${info.file.name} 上传成功`);
-        let data={id:1,head:info.file.response}
-        // updateHead('/user/updateHead',data).then(res=>{
-        //   console.log(res);
-        // })
+       
+        
+        let data={id:-1,houseid:houseid,url:info.file.response,area:imagetype,direction:direction,type:'vr'}
+        console.log(data);
+        
+        updateVrimage('/image/updateVrimage',data).then(res=>{
+          console.log(res);
+          message.success(`${info.file.name} 上传${res.data.msg}`);
+        })
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} 上传失败`);
       }
@@ -242,13 +249,11 @@ const Newhome=(props)=> {
   const doedit=(r)=>{
     console.log(r);
     const data={...r,ishot:r.ishot==='true'?true:false,kp:moment(r.kp),jf:moment(r.jf)}
-    form2.resetFields()
-    
     Object.keys(data).forEach(key => {
       form2.setFieldValue(key, data[key]);
     });
     setIsModalOpen2(true)
-
+    setHouseid(r.id)
   }
   const dodelete=(r)=>{
     console.log(r);
@@ -283,9 +288,25 @@ const Newhome=(props)=> {
   };
   const selecthandleChange = (value: string) => {
     console.log(`selected ${value}`);
+    setImagetype(value)
   };
   const upf=()=>{
-    
+    setDirection('f')
+  }
+  const upba=()=>{
+    setDirection('ba')
+  }
+  const upl=()=>{
+    setDirection('l')
+  }
+  const upr=()=>{
+    setDirection('r')
+  }
+  const upt=()=>{
+    setDirection('t')
+  }
+  const upbo=()=>{
+    setDirection('bo')
   }
   return (
     <div className='newhome'>
@@ -418,7 +439,6 @@ const Newhome=(props)=> {
             onFinish={onFinish2}
             onFinishFailed={onFinishFailed2}
           >
-            
             <Form.Item
               label="楼盘名称"
               name="name"
@@ -497,7 +517,7 @@ const Newhome=(props)=> {
           </TabPane>
           <TabPane tab="VR素材" key="2">
             <Select
-              defaultValue="lucy"
+              defaultValue="客厅"
               style={{ width: 120 }}
               onChange={selecthandleChange}
               options={[
@@ -508,10 +528,40 @@ const Newhome=(props)=> {
               ]}
             />
             <br />
-            <img src="" alt="" />
+
+              <Upload {...file}>
+                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
+                    <Button size='small' onClick={upf} icon={<UploadOutlined />}>上传正面</Button>
+              </Upload>
+             <br />
             <Upload {...file}>
-                  <Button size='small' onClick={upf} icon={<UploadOutlined />}>上传正面</Button>
-            </Upload>
+                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
+                    <Button size='small' onClick={upba} icon={<UploadOutlined />}>上传后面</Button>
+              </Upload>
+             <br />
+            <Upload {...file}>
+                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
+                    <Button size='small' onClick={upl} icon={<UploadOutlined />}>上传左面</Button>
+              </Upload> 
+
+             <br />
+            <Upload {...file}>
+                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
+                    <Button size='small' onClick={upr} icon={<UploadOutlined />}>上传右面</Button>
+              </Upload> 
+
+             <br />
+            <Upload {...file}>
+                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
+                    <Button size='small' onClick={upt} icon={<UploadOutlined />}>上传上面</Button>
+              </Upload>
+
+             <br />
+            <Upload {...file}>
+                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
+                    <Button size='small' onClick={upbo} icon={<UploadOutlined />}>上传下面</Button>
+              </Upload>
+          
           </TabPane>
         </Tabs>
       </Modal>
