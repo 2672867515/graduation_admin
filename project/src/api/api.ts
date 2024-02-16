@@ -20,3 +20,9 @@ export const getuser = (url, data) => {
 export const updateVrimage = (url, data) => {
   return instance.post(url,data);
 };
+export const getVrimg = (url, data) => {
+  return instance.post(url,data);
+};
+export const getimgTosee = (url, data) => {
+  return instance.post(url,data);
+};

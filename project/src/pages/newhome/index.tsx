@@ -6,12 +6,13 @@ import type { DatePickerProps } from 'antd';
 import type { TabsProps ,UploadProps} from 'antd';
 import { useDispatch } from 'react-redux';
 import moment from 'moment';
+import nodata from '../../img/nodata.jpg'
 import {
   ArrowUpOutlined
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { getall, updateVrimage } from '../../api/api.ts';
+import { getVrimg, getall, getimgTosee, updateVrimage } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
 const Newhome=(props)=> {
   const [messageApi, contextHolder] = message.useMessage();
@@ -20,9 +21,11 @@ const Newhome=(props)=> {
   const [loading2, setLoading2] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [name, setName] = useState('');
-  const [imagetype,setImagetype]=useState('living')
+  const [imagetype,setImagetype]=useState('客厅')
   const [houseid,setHouseid]=useState()
   const [direction,setDirection]=useState('')
+  const [imageid,setImageid]=useState(-1)
+  const [seeimg,setSeeimg]=useState([{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}])
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [detail,setDetail]=useState(false)
@@ -188,14 +191,19 @@ const Newhome=(props)=> {
         console.log(info.file, info.fileList);
       }
       if (info.file.status === 'done') {
-       
+        let data={}
+        console.log(imageid);
         
-        let data={id:-1,houseid:houseid,url:info.file.response,area:imagetype,direction:direction,type:'vr'}
-        console.log(data);
-        
+        if(imageid!=-1){
+          data={id:imageid,houseid:houseid,url:info.file.response,area:imagetype,direction:direction,type:'Newhomevr'}
+
+        }else{
+          data={id:-1,houseid:houseid,url:info.file.response,area:imagetype,direction:direction,type:'Newhomevr'}
+        }
         updateVrimage('/image/updateVrimage',data).then(res=>{
           console.log(res);
           message.success(`${info.file.name} 上传${res.data.msg}`);
+          setImageid(-1)
         })
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} 上传失败`);
@@ -254,6 +262,33 @@ const Newhome=(props)=> {
     });
     setIsModalOpen2(true)
     setHouseid(r.id)
+    const data2={houseid:r.id,area:imagetype,type:'Newhomevr'}
+    getimgTosee('image/getimgTosee',data2).then(res=>{
+      console.log(res.data.data);
+      let temp=[{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}]
+      res.data.data.forEach((item)=>{
+        if(item.direction==='f'){
+          temp[0]=item
+        }
+        if(item.direction==='ba'){
+          temp[1]=item
+        }
+        if(item.direction==='l'){
+          temp[2]=item
+        }
+        if(item.direction==='r'){
+          temp[3]=item
+        }
+        if(item.direction==='t'){
+          temp[4]=item
+        }
+        if(item.direction==='bo'){
+          temp[5]=item
+        }
+      })
+      console.log(temp);
+      setSeeimg(temp)
+    })
   }
   const dodelete=(r)=>{
     console.log(r);
@@ -270,6 +305,7 @@ const Newhome=(props)=> {
     setIsModalOpen2(false);
   };
     const onFinish2 = (values: any) => {
+      
     setLoading2(true);
     setTimeout(() => {
       setLoading2(false);
@@ -289,25 +325,46 @@ const Newhome=(props)=> {
   const selecthandleChange = (value: string) => {
     console.log(`selected ${value}`);
     setImagetype(value)
+    let data={houseid:houseid,area:value,type:'Newhomevr'}
+    getimgTosee('image/getimgTosee',data).then(res=>{
+      console.log(res);
+      let temp=[{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}]
+      res.data.data.forEach((item)=>{
+        if(item.direction==='f'){
+          temp[0]=item
+        }
+        if(item.direction==='ba'){
+          temp[1]=item
+        }
+        if(item.direction==='l'){
+          temp[2]=item
+        }
+        if(item.direction==='r'){
+          temp[3]=item
+        }
+        if(item.direction==='t'){
+          temp[4]=item
+        }
+        if(item.direction==='bo'){
+          temp[5]=item
+        }
+      })
+      console.log(temp);
+      
+      setSeeimg(temp)
+    })
   };
-  const upf=()=>{
-    setDirection('f')
+  const up=(d)=>{
+    setDirection(d)
+    const data={houseid:houseid,area:imagetype,direction:d,type:'Newhomevr'}
+    getVrimg('image/getVrimg',data).then(res=>{
+      console.log(res);
+      if(res.data.data.length>0){
+        setImageid(res.data.data[0].id)
+      }
+    })
   }
-  const upba=()=>{
-    setDirection('ba')
-  }
-  const upl=()=>{
-    setDirection('l')
-  }
-  const upr=()=>{
-    setDirection('r')
-  }
-  const upt=()=>{
-    setDirection('t')
-  }
-  const upbo=()=>{
-    setDirection('bo')
-  }
+
   return (
     <div className='newhome'>
       {contextHolder}
@@ -440,6 +497,13 @@ const Newhome=(props)=> {
             onFinishFailed={onFinishFailed2}
           >
             <Form.Item
+              label="楼盘id"
+              name="id"
+              rules={[{ required: true, message: '请输入楼盘名称' }]}
+            >
+              <Input disabled placeholder="请输入楼盘名称" />
+            </Form.Item>
+            <Form.Item
               label="楼盘名称"
               name="name"
               rules={[{ required: true, message: '请输入楼盘名称' }]}
@@ -521,45 +585,45 @@ const Newhome=(props)=> {
               style={{ width: 120 }}
               onChange={selecthandleChange}
               options={[
-                { value: 'living', label: '客厅' },
-                { value: 'mainroom', label: '主卧' },
-                { value: 'secondroom', label: '次卧' },
-                { value: 'washroom', label: '卫生间' },
+                { value: '客厅', label: '客厅' },
+                { value: '主卧', label: '主卧' },
+                { value: '次卧', label: '次卧' },
+                { value: '卫生间', label: '卫生间' },
               ]}
             />
             <br />
-
+            <br />
               <Upload {...file}>
-                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
-                    <Button size='small' onClick={upf} icon={<UploadOutlined />}>上传正面</Button>
+                    <img style={{width:'80px'}} src={seeimg[0]?.url||nodata} alt="" />
+                    <Button size='small' onClick={()=>up('f')} icon={<UploadOutlined />}>上传正面</Button>
               </Upload>
-             <br />
+             <br /><br />
             <Upload {...file}>
-                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
-                    <Button size='small' onClick={upba} icon={<UploadOutlined />}>上传后面</Button>
+                    <img style={{width:'80px'}} src={seeimg[1]?.url||nodata} alt="" />
+                    <Button size='small' onClick={()=>up('ba')} icon={<UploadOutlined />}>上传后面</Button>
               </Upload>
-             <br />
+             <br /><br />
             <Upload {...file}>
-                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
-                    <Button size='small' onClick={upl} icon={<UploadOutlined />}>上传左面</Button>
+                    <img style={{width:'80px'}} src={seeimg[2]?.url||nodata} alt="" />
+                    <Button size='small' onClick={()=>up('l')} icon={<UploadOutlined />}>上传左面</Button>
               </Upload> 
-
+              <br />
              <br />
             <Upload {...file}>
-                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
-                    <Button size='small' onClick={upr} icon={<UploadOutlined />}>上传右面</Button>
+                    <img style={{width:'80px'}} src={seeimg[3]?.url||nodata} alt="" />
+                    <Button size='small' onClick={()=>up('r')} icon={<UploadOutlined />}>上传右面</Button>
               </Upload> 
-
+              <br />
              <br />
             <Upload {...file}>
-                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
-                    <Button size='small' onClick={upt} icon={<UploadOutlined />}>上传上面</Button>
+                    <img style={{width:'80px'}} src={seeimg[4]?.url||nodata} alt="" />
+                    <Button size='small' onClick={()=>up('t')} icon={<UploadOutlined />}>上传上面</Button>
               </Upload>
-
+              <br />
              <br />
             <Upload {...file}>
-                    <img style={{width:'80px'}} src="https://s.gravatar.com/avatar/190fd7660794cd83f950b894eb21b5d2?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwp.png" alt="" />
-                    <Button size='small' onClick={upbo} icon={<UploadOutlined />}>上传下面</Button>
+                    <img style={{width:'80px'}} src={seeimg[5]?.url||nodata} alt="" />
+                    <Button size='small' onClick={()=>up('bo')} icon={<UploadOutlined />}>上传下面</Button>
               </Upload>
           
           </TabPane>
