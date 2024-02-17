@@ -12,7 +12,7 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { getVrimg, getall, getimgTosee, updateVrimage } from '../../api/api.ts';
+import { addNewhome, getVrimg, getall, getimgTosee, updateNewhome, updateVrimage } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
 const Newhome=(props)=> {
   const [messageApi, contextHolder] = message.useMessage();
@@ -26,6 +26,7 @@ const Newhome=(props)=> {
   const [direction,setDirection]=useState('')
   const [imageid,setImageid]=useState(-1)
   const [seeimg,setSeeimg]=useState([{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}])
+  const [activeKey, setActiveKey] = useState("1");
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [detail,setDetail]=useState(false)
@@ -191,9 +192,36 @@ const Newhome=(props)=> {
         console.log(info.file, info.fileList);
       }
       if (info.file.status === 'done') {
-        let data={}
-        console.log(imageid);
+        console.log("imageid:"+imageid);
+        let temp=[...seeimg]
+       
+        switch (direction) {
+          case "f":
+            temp[0].url=info.file.response
+            break;
+          case "ba":
+            temp[1].url=info.file.response
+            break;
+          case "l":
+            temp[2].url=info.file.response
+            break;
+          case "r":
+            temp[3].url=info.file.response
+            break;
+          case "t":
+            temp[4].url=info.file.response
+            break;
+          case "bo":
+            temp[5].url=info.file.response
+            break;
+
+          default:
+            break;
+        }
+        console.log(temp);
         
+        setSeeimg(temp)
+        let data={}
         if(imageid!=-1){
           data={id:imageid,houseid:houseid,url:info.file.response,area:imagetype,direction:direction,type:'Newhomevr'}
 
@@ -214,7 +242,7 @@ const Newhome=(props)=> {
     ishot: false, // 设置热门开关的初始值为 false
   };
   useEffect(()=>{
-    getall('/newhouse/getall').then((res)=>{
+    getall('/newhome/getall').then((res)=>{
       console.log(res);
       setDataSource(res.data.data)
     })
@@ -234,13 +262,20 @@ const Newhome=(props)=> {
 
   const onFinish = (values: any) => {
     setLoading(true);
+   
     setTimeout(() => {
-      setLoading(false);
-      setIsModalOpen(false);
-      messageApi.open({
-        type: 'success',
-        content: '添加成功',
-      });
+      addNewhome('newhome/addNewhome',data).then(res=>{
+        setLoading(false);
+        setIsModalOpen(false);
+        messageApi.open({
+          type: 'success',
+          content: '添加成功',
+        });
+        getall('/newhome/getall').then((res)=>{
+          setDataSource(res.data.data)
+        })
+      })
+      
     }, 1000);
     console.log('Success:', values);
     const data={...values,kp:values.kp.format('YYYY-MM-DD'),jf:values.jf.format('YYYY-MM-DD')}
@@ -255,6 +290,7 @@ const Newhome=(props)=> {
   };
 
   const doedit=(r)=>{
+    setActiveKey("1")
     console.log(r);
     const data={...r,ishot:r.ishot==='true'?true:false,kp:moment(r.kp),jf:moment(r.jf)}
     Object.keys(data).forEach(key => {
@@ -290,6 +326,10 @@ const Newhome=(props)=> {
       setSeeimg(temp)
     })
   }
+  
+  const tabshandleChange = (key) => {
+    setActiveKey(key);
+  }
   const dodelete=(r)=>{
     console.log(r);
     
@@ -307,16 +347,24 @@ const Newhome=(props)=> {
     const onFinish2 = (values: any) => {
       
     setLoading2(true);
-    setTimeout(() => {
-      setLoading2(false);
-      messageApi.open({
-        type: 'success',
-        content: '编辑成功',
-      });
-    }, 1000);
     console.log('Success:', values);
     const data={...values,kp:values.kp.format('YYYY-MM-DD'),jf:values.jf.format('YYYY-MM-DD')}
     console.log(data);
+    setTimeout(() => {
+      updateNewhome("newhome/updateNewhome",data).then(res=>{
+        setLoading2(false);
+        messageApi.open({
+          type: 'success',
+          content: '编辑成功',
+        });
+        getall('/newhome/getall').then((res)=>{
+          console.log(res);
+          setDataSource(res.data.data)
+        })
+      })
+     
+    }, 1000);
+
 
   };
   const onFinishFailed2 = (errorInfo: any) => {
@@ -485,7 +533,7 @@ const Newhome=(props)=> {
           </Button>,
         ]}
         >
-        <Tabs defaultActiveKey="1">
+        <Tabs defaultActiveKey="1" activeKey={activeKey} onChange={tabshandleChange}>
           <TabPane tab="基本信息" key="1">
           <Form
             form={form2}

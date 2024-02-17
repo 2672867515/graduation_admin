@@ -26,3 +26,9 @@ export const getVrimg = (url, data) => {
 export const getimgTosee = (url, data) => {
   return instance.post(url,data);
 };
+export const updateNewhome = (url, data) => {
+  return instance.post(url,data);
+};
+export const addNewhome = (url, data) => {
+  return instance.post(url,data);
+};
