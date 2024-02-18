@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom';
 import './index.scss'
-import { Button, DatePicker, Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select } from 'antd';
+import { Button, DatePicker, Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select, Popconfirm } from 'antd';
 import type { DatePickerProps } from 'antd';
 import type { TabsProps ,UploadProps} from 'antd';
 import { useDispatch } from 'react-redux';
@@ -12,14 +12,18 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { addNewhome, getVrimg, getall, getimgTosee, updateNewhome, updateVrimage } from '../../api/api.ts';
+import { addHousetype, addNewhome, getHousetype, getVrimg, getall, getimgTosee, updateHousetype, updateNewhome, updateVrimage } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
 const Newhome=(props)=> {
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading2, setLoading2] = useState(false);
+  const [loading3, setLoading3] = useState(false);
+  const [loading4, setLoading4] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
+  const [isModalOpen3, setIsModalOpen3] = useState(false);
+  const [isModalOpen4, setIsModalOpen4] = useState(false);
   const [name, setName] = useState('');
   const [imagetype,setImagetype]=useState('客厅')
   const [houseid,setHouseid]=useState()
@@ -27,22 +31,14 @@ const Newhome=(props)=> {
   const [imageid,setImageid]=useState(-1)
   const [seeimg,setSeeimg]=useState([{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}])
   const [activeKey, setActiveKey] = useState("1");
+  const [addhousetypeurl, setAddhousetypeurl] = useState(-1);
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
+  const [form3] = Form.useForm();
+  const [form4] = Form.useForm();
   const [detail,setDetail]=useState(false)
   const [dataSource,setDataSource]=useState([])
-  const [dataSource2,setDataSource2]=useState([
-    {
-      id: '胡彦斌',
-      name: 32,
-      address: '西湖区湖底公园1号',
-    },
-    {
-      id: '胡彦祖',
-      name: 42,
-      address: '西湖区湖底1wwwwwwwwwwwwwwwwwwwww公园1号',
-    },
-  ])
+  const [dataSource2,setDataSource2]=useState([])
 
   const columns = [
     {
@@ -70,7 +66,7 @@ const Newhome=(props)=> {
       className: 'column', 
     },
     {
-      title: '尺寸范围',
+      title: '尺寸范围/m²',
       dataIndex: 'size',
       key: 'size',
       className: 'column', 
@@ -124,7 +120,14 @@ const Newhome=(props)=> {
         <div className="operation">
         <a onClick={()=>doedit(r)} style={{marginRight:'10px'}}>编辑</a>
         <a onClick={()=>todetail(r)} style={{marginRight:'10px'}}>详情</a>
-        <a onClick={()=>dodelete(r)}>删除</a>
+        <Popconfirm
+          title="确认删除？"
+          onConfirm={()=>Popconfirmconfirm(r)}
+          okText="确认"
+          cancelText="取消"
+        >
+          <a>删除</a>
+        </Popconfirm>
         </div>
         ),
     },
@@ -132,25 +135,33 @@ const Newhome=(props)=> {
   ];
   const columns2 = [
     {
+      title: 'id',
+      dataIndex: 'id',
+      key: 'id',
+    },
+    {
       title: '户型图',
       dataIndex: 'url',
       key: 'url',
       className: 'column', 
+      render: (t,r) => (
+        <img style={{width:'80px'}} src={t||nodata} alt="" />
+        ),
     },
     {
       title: '户型',
-      dataIndex: 'housetype',
-      key: 'housetype',
+      dataIndex: 'type',
+      key: 'type',
       className: 'column', 
     },
     {
-      title: '建面',
+      title: '建面/m²',
       dataIndex: 'size',
       key: 'size',
       className: 'column', 
     },
     {
-      title: '位置',
+      title: '单元位置',
       dataIndex: 'location',
       key: 'location',
       className: 'column', 
@@ -173,8 +184,15 @@ const Newhome=(props)=> {
       key: 'operation',
       render: (t,r) => (
         <div className="operation">
-        <a onClick={()=>dodelete(r)} style={{marginRight:'10px'}}>编辑</a>
-        <a onClick={()=>dodelete(r)}>删除</a>
+        <a onClick={()=>doedit2(r)} style={{marginRight:'10px'}}>编辑</a>
+        <Popconfirm
+          title="确认删除？"
+          onConfirm={()=>Popconfirmconfirm2(r)}
+          okText="确认"
+          cancelText="取消"
+        >
+          <a onClick={()=>dodelete(r)} style={{marginRight:'10px'}}>删除</a>
+        </Popconfirm>
         </div>
         ),
     },
@@ -238,6 +256,52 @@ const Newhome=(props)=> {
       }
     },
   };
+  const file2: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        form4.setFieldValue('url',info.file.response)
+       updateHousetype('housetype/updateHousetype',form4.getFieldsValue()).then(res=>{
+        message.success(`${info.file.name} 上传成功`);
+        getHousetype('housetype/getHousetype',{houseid:form4.getFieldValue('houseid')}).then(res=>{
+          setDataSource2(res.data.data)
+        })
+      })
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
+  const file3: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        form3.setFieldValue('url',info.file.response)
+        message.success(`${info.file.name} 上传成功`);
+        setAddhousetypeurl(info.file.response)
+      console.log(form3.getFieldValue('url'));
+      
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
   const initialValues = {
     ishot: false, // 设置热门开关的初始值为 false
   };
@@ -256,13 +320,21 @@ const Newhome=(props)=> {
     setIsModalOpen(true);
     form.resetFields()
   }
+  const add2=()=>{
+    setIsModalOpen3(true);
+    form3.resetFields()
+    form3.setFieldValue("houseid",houseid)
+    setAddhousetypeurl(-1)
+  }
   const handleSwitchChange = (checked) => {
     form.setFieldsValue({ ishot: checked });
   };
 
   const onFinish = (values: any) => {
     setLoading(true);
-   
+    console.log('Success:', values);
+    const data={...values,kp:values.kp.format('YYYY-MM-DD'),jf:values.jf.format('YYYY-MM-DD')}
+    console.log(data);
     setTimeout(() => {
       addNewhome('newhome/addNewhome',data).then(res=>{
         setLoading(false);
@@ -277,16 +349,67 @@ const Newhome=(props)=> {
       })
       
     }, 1000);
+
+
+  };
+  const onFinish3 = (values: any) => {
+    setLoading3(true);
     console.log('Success:', values);
-    const data={...values,kp:values.kp.format('YYYY-MM-DD'),jf:values.jf.format('YYYY-MM-DD')}
-    console.log(data);
+    setTimeout(() => {
+      
+      addHousetype('housetype/addHousetype',form3.getFieldsValue()).then(res=>{
+        setLoading3(false);
+        setIsModalOpen3(false);
+        messageApi.open({
+          type: 'success',
+          content: '添加成功',
+        });
+        getHousetype('housetype/getHousetype',{houseid:form3.getFieldValue('houseid')}).then(res=>{
+          setDataSource2(res.data.data)
+        })
+      })
+      
+    }, 1000);
+
+
+  };
+  const onFinish4 = (values: any) => {
+    setLoading4(true);
+    console.log('Success:', values);
+    setTimeout(() => {
+      updateHousetype('housetype/updateHousetype',values).then(res=>{
+        setLoading4(false);
+        setIsModalOpen4(false);
+        messageApi.open({
+          type: 'success',
+          content: '编辑成功',
+        });
+        getHousetype('housetype/getHousetype',{houseid:values.houseid}).then(res=>{
+          setDataSource2(res.data.data)
+        })
+      })
+      
+    }, 1000);
+
 
   };
   const onFinishFailed = (errorInfo: any) => {
     console.log('meaasgeFailed:', errorInfo);
   };
+  const onFinishFailed3 = (errorInfo: any) => {
+    console.log('meaasgeFailed:', errorInfo);
+  };
+  const onFinishFailed4 = (errorInfo: any) => {
+    console.log('meaasgeFailed:', errorInfo);
+  };
   const handleCancel = () => {
     setIsModalOpen(false);
+  };
+  const handleCancel3 = () => {
+    setIsModalOpen3(false);
+  };
+  const handleCancel4 = () => {
+    setIsModalOpen4(false);
   };
 
   const doedit=(r)=>{
@@ -326,6 +449,15 @@ const Newhome=(props)=> {
       setSeeimg(temp)
     })
   }
+  const doedit2=(r)=>{
+
+    console.log(r);
+    Object.keys(r).forEach(key => {
+      form4.setFieldValue(key, r[key]);
+    });  
+    setIsModalOpen4(true)
+
+  }
   
   const tabshandleChange = (key) => {
     setActiveKey(key);
@@ -337,14 +469,29 @@ const Newhome=(props)=> {
   const todetail=(r)=>{
     setDetail(true)
     setName(r.name)
+    setHouseid(r.id)
+    getHousetype('housetype/getHousetype',{houseid:r.id}).then(res=>{
+      setDataSource2(res.data.data)
+    })
   }
+  
+  const Popconfirmconfirm=(r)=>{
+    console.log(r);
+    message.success('删除成功');
+  }
+
+  const Popconfirmconfirm2=(r)=>{
+    console.log(r);
+    message.success('删除成功');
+  }
+
   const close=()=>{
     setDetail(false)
   }
   const handleCancel2 = () => {
     setIsModalOpen2(false);
   };
-    const onFinish2 = (values: any) => {
+  const onFinish2 = (values: any) => {
       
     setLoading2(true);
     console.log('Success:', values);
@@ -420,7 +567,7 @@ const Newhome=(props)=> {
       <Button style={{color:'rgb(82,196,26)',borderColor:'rgb(82,196,26)' ,marginTop:'20px'}} onClick={add} >添加楼盘</Button>
       <Table style={{marginTop:'10px'}} dataSource={dataSource} columns={columns} />
       {detail&&  <div className="name">{name}</div> }
-      {detail&&<Button style={{color:'rgb(82,196,26)',borderColor:'rgb(82,196,26)' ,marginTop:'10px'}} onClick={add} >添加户型</Button>}
+      {detail&&<Button style={{color:'rgb(82,196,26)',borderColor:'rgb(82,196,26)' ,marginTop:'10px'}} onClick={add2} >添加户型</Button>}
       {detail&&<Button danger style={{marginLeft:'20px',marginTop:'10px'}} onClick={close} >关闭</Button>}
       {detail&&<Table style={{marginTop:'10px'}} dataSource={dataSource2} columns={columns2}   pagination={false}  />}
     
@@ -442,7 +589,7 @@ const Newhome=(props)=> {
         <Form
           form={form}
           name="basic"
-          labelCol={{span:4}}
+          labelCol={{span:5}}
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 500 }}
           onFinish={onFinish}
@@ -472,11 +619,11 @@ const Newhome=(props)=> {
              <Input  placeholder="请输入可选户型" />
           </Form.Item>
           <Form.Item
-            label="尺寸范围"
+            label="尺寸范围/m²"
             name="size"
             rules={[{ required: true, message: '请输入尺寸范围' }]}
           >
-             <Input  placeholder="请输入尺寸范围" />
+             <Input  placeholder="请输入尺寸范围/m²" />
           </Form.Item>
           <Form.Item
             label="均价/万"
@@ -522,7 +669,7 @@ const Newhome=(props)=> {
         </Form>
       </Modal>
       <Modal 
-        title="编辑" 
+        title="编辑楼盘" 
         confirmLoading={loading2} 
         open={isModalOpen2} 
         onCancel={()=>handleCancel2()}
@@ -538,7 +685,7 @@ const Newhome=(props)=> {
           <Form
             form={form2}
             name="basic"
-            labelCol={{span:4}}
+            labelCol={{span:5}}
             wrapperCol={{ span: 16 }}
             style={{ maxWidth: 500 }}
             onFinish={onFinish2}
@@ -573,11 +720,11 @@ const Newhome=(props)=> {
               <Input  placeholder="请输入可选户型" />
             </Form.Item>
             <Form.Item
-              label="尺寸范围"
+              label="尺寸范围/m²"
               name="size"
               rules={[{ required: true, message: '请输入尺寸范围' }]}
             >
-              <Input  placeholder="请输入尺寸范围" />
+              <Input  placeholder="请输入尺寸范围/m²" />
             </Form.Item>
             <Form.Item
               label="均价/万"
@@ -676,6 +823,169 @@ const Newhome=(props)=> {
           
           </TabPane>
         </Tabs>
+      </Modal>
+      <Modal 
+        title="添加户型" 
+        open={isModalOpen3}
+        onCancel={()=>handleCancel3()}
+        footer={[
+          // 注意这里使用的是 Form 组件的 submit 方法
+          <Button  onClick={() => handleCancel3()}>
+            关闭
+          </Button>,
+            <Button key="submit" type="primary" loading={loading3} onClick={() => form3.submit()}>
+            提交
+          </Button>
+        ]}
+        >
+          <Form
+            form={form3}
+            name="basic"
+            labelCol={{span:4}}
+            wrapperCol={{ span: 16 }}
+            style={{ maxWidth: 500 }}
+            onFinish={onFinish3}
+            onFinishFailed={onFinishFailed3}
+          >
+            <Form.Item
+              label="楼盘id"
+              name="houseid"
+              rules={[{ required: true}]}
+            >
+              <Input value={houseid} disabled  />
+            </Form.Item>
+            <Form.Item
+              label="户型图"
+              name="url"
+            >
+             <Upload {...file3}>
+                    <img style={{width:"80px"}} src={addhousetypeurl===-1?nodata:addhousetypeurl} alt="" />
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户型图</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item
+              label="户型"
+              name="type"
+              rules={[{ required: true, message: '请输入户型' }]}
+            >
+              <Input  placeholder="请输入户型" />
+            </Form.Item>
+            <Form.Item
+              label="建面/m²"
+              name="size"
+              rules={[{ required: true, message: '请输入建面' }]}
+            >
+              <Input  placeholder="请输入建面/m²" />
+            </Form.Item>
+            <Form.Item
+              label="单元位置"
+              name="location"
+              rules={[{ required: true, message: '请输入单元位置' }]}
+            >
+              <Input  placeholder="请输入单元位置" />
+            </Form.Item>
+            <Form.Item
+              label="总价/万"
+              name="price"
+              rules={[{ required: true, message: '请输入总价' }]}
+            >
+              <Input  placeholder="请输入总价" />
+            </Form.Item>
+         
+            <Form.Item
+              label="单价/万"
+              name="per"
+              rules={[{ required: true, message: '请输入单价' }]}
+            >
+              <Input  placeholder="请输入单价" />
+            </Form.Item>
+          </Form>
+      </Modal>
+      <Modal 
+        title="编辑户型" 
+        confirmLoading={loading4} 
+        open={isModalOpen4}
+        onCancel={()=>handleCancel4()}
+        footer={[
+          // 注意这里使用的是 Form 组件的 submit 方法
+          <Button  onClick={() => handleCancel4()}>
+            关闭
+          </Button>,
+            <Button key="submit" type="primary" loading={loading4} onClick={() => form4.submit()}>
+            提交
+          </Button>
+        ]}
+        >
+          <Form
+            form={form4}
+            name="basic"
+            labelCol={{span:4}}
+            wrapperCol={{ span: 16 }}
+            style={{ maxWidth: 500 }}
+            onFinish={onFinish4}
+            onFinishFailed={onFinishFailed4}
+          >
+            <Form.Item
+              label="户型id"
+              name="id"
+              rules={[{ required: true}]}
+            >
+              <Input disabled  />
+            </Form.Item>
+            <Form.Item
+              label="楼盘id"
+              name="houseid"
+              rules={[{ required: true}]}
+            >
+              <Input  disabled  />
+            </Form.Item>
+            <Form.Item
+              label="户型图"
+              name="url"
+              rules={[{ required: true}]}
+            >
+             <Upload {...file2}>
+                    <img style={{width:"80px"}} src={form4.getFieldValue('url')||nodata} alt="" />
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户型图</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item
+              label="户型"
+              name="type"
+              rules={[{ required: true, message: '请输入户型' }]}
+            >
+              <Input  placeholder="请输入户型" />
+            </Form.Item>
+            <Form.Item
+              label="建面/m²"
+              name="size"
+              rules={[{ required: true, message: '请输入建面' }]}
+            >
+              <Input  placeholder="请输入建面/m²" />
+            </Form.Item>
+            <Form.Item
+              label="单元位置"
+              name="location"
+              rules={[{ required: true, message: '请输入单元位置' }]}
+            >
+              <Input  placeholder="请输入单元位置" />
+            </Form.Item>
+            <Form.Item
+              label="总价/万"
+              name="price"
+              rules={[{ required: true, message: '请输入总价' }]}
+            >
+              <Input  placeholder="请输入总价" />
+            </Form.Item>
+         
+            <Form.Item
+              label="单价/万"
+              name="per"
+              rules={[{ required: true, message: '请输入单价' }]}
+            >
+              <Input  placeholder="请输入单价" />
+            </Form.Item>
+          </Form>
       </Modal>
       </div>
   )

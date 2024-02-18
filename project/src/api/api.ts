@@ -32,3 +32,12 @@ export const updateNewhome = (url, data) => {
 export const addNewhome = (url, data) => {
   return instance.post(url,data);
 };
+export const getHousetype = (url, data) => {
+  return instance.post(url,data);
+};
+export const updateHousetype = (url, data) => {
+  return instance.post(url,data);
+};
+export const addHousetype = (url, data) => {
+  return instance.post(url,data);
+};
