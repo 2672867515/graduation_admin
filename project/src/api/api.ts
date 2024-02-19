@@ -41,3 +41,12 @@ export const updateHousetype = (url, data) => {
 export const addHousetype = (url, data) => {
   return instance.post(url,data);
 };
+export const deleteHousetype = (url, data) => {
+  return instance.post(url,data);
+};
+export const deletenNewhome = (url, data) => {
+  return instance.post(url,data);
+};
+export const searchNewhome = (url, data) => {
+  return instance.post(url,data);
+};

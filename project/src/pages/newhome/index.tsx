@@ -6,13 +6,14 @@ import type { DatePickerProps } from 'antd';
 import type { TabsProps ,UploadProps} from 'antd';
 import { useDispatch } from 'react-redux';
 import moment from 'moment';
+import { useLocation } from 'react-router-dom';
 import nodata from '../../img/nodata.jpg'
 import {
   ArrowUpOutlined
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { addHousetype, addNewhome, getHousetype, getVrimg, getall, getimgTosee, updateHousetype, updateNewhome, updateVrimage } from '../../api/api.ts';
+import { addHousetype, addNewhome, deleteHousetype, deletenNewhome, getHousetype, getVrimg, getall, getimgTosee, updateHousetype, updateNewhome, updateVrimage } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
 const Newhome=(props)=> {
   const [messageApi, contextHolder] = message.useMessage();
@@ -39,7 +40,9 @@ const Newhome=(props)=> {
   const [detail,setDetail]=useState(false)
   const [dataSource,setDataSource]=useState([])
   const [dataSource2,setDataSource2]=useState([])
-
+  const location = useLocation();
+  const { pathname } = location;
+  let type = pathname.replace(/\//g, '')+'vr';
   const columns = [
     {
       title: 'id',
@@ -126,7 +129,7 @@ const Newhome=(props)=> {
           okText="确认"
           cancelText="取消"
         >
-          <a>删除</a>
+          <a >删除</a>
         </Popconfirm>
         </div>
         ),
@@ -191,7 +194,7 @@ const Newhome=(props)=> {
           okText="确认"
           cancelText="取消"
         >
-          <a onClick={()=>dodelete(r)} style={{marginRight:'10px'}}>删除</a>
+          <a>删除</a>
         </Popconfirm>
         </div>
         ),
@@ -314,7 +317,7 @@ const Newhome=(props)=> {
   const handleCallback = (data) => {
     setDetail(false)
     console.log(data);
-    
+    setDataSource(data)
   };
   const add=()=>{
     setIsModalOpen(true);
@@ -462,10 +465,6 @@ const Newhome=(props)=> {
   const tabshandleChange = (key) => {
     setActiveKey(key);
   }
-  const dodelete=(r)=>{
-    console.log(r);
-    
-  }
   const todetail=(r)=>{
     setDetail(true)
     setName(r.name)
@@ -477,12 +476,29 @@ const Newhome=(props)=> {
   
   const Popconfirmconfirm=(r)=>{
     console.log(r);
-    message.success('删除成功');
+    console.log(type);
+    setDetail(false)
+    deletenNewhome('newhome/deletenNewhome',{id:r.id,type:type}).then(res=>{
+      message.success('删除成功');
+      getall('/newhome/getall').then((res)=>{
+        setDataSource(res.data.data)
+      })
+    })
+    
   }
 
   const Popconfirmconfirm2=(r)=>{
-    console.log(r);
-    message.success('删除成功');
+    // console.log(r);
+    deleteHousetype('housetype/deleteHousetype',{id:r.id}).then(res=>{
+      console.log(res);
+      
+      message.success('删除成功');
+      getHousetype('housetype/getHousetype',{houseid:r.houseid}).then(res=>{
+        setDataSource2(res.data.data)
+      })
+
+    })
+   
   }
 
   const close=()=>{

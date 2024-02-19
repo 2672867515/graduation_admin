@@ -124,9 +124,12 @@ const Used=(props)=> {
     console.log(r);
     
   }
+  const handleCallback = (data) => {
+
+  };
   return (
     <div className='newhome'>
-      <Searchpart type='newhome' />
+      <Searchpart type='newhome'  callback={handleCallback}/>
       <Button style={{color:'rgb(82,196,26)',borderColor:'rgb(82,196,26)' ,marginTop:'20px'}} onClick={add} >添加</Button>
       <Table style={{marginTop:'10px'}} dataSource={dataSource} columns={columns} />;
     

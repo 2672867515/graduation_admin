@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './index.scss'
 import { Button, Col, Form, Input, Row } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import { searchNewhome } from '../../api/api.ts';
 interface detail{
   type:string;
   callback:(data)=>void
@@ -9,12 +10,29 @@ interface detail{
 const Searchpart=React.memo((props:detail)=> {
   const {type,callback}=props
   const [form] = Form.useForm();
-  const [messages,setMessages]=useState({id:'',name:''} )
-  // console.log(type);
+  const [messages,setMessages]=useState({})
+  console.log(type);
 
   const onFinish = (values: any) => {
     console.log('Success:', values);
-    callback(1)
+    let data={id:values.id,name:values.name}
+    if(values.id===''){
+      data.id=null
+    }
+    if(values.name===''){
+      data.name=null
+    }
+   
+    if(type==='newhome'){
+      searchNewhome('newhome/searchNewhouse',data).then(res=>{
+        console.log(res.data.data);
+        callback(res.data.data)
+      })
+    }else if(type==='used'){
+
+    }else{
+      
+    }
   };
   
   const onFinishFailed = (errorInfo: any) => {
@@ -29,13 +47,12 @@ const Searchpart=React.memo((props:detail)=> {
               name="message"
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
-              initialValues={messages}
             >
             <Row gutter={20}>
               
               <Col span={8} offset={3} >
                 <Form.Item
-                  label="房屋id"
+                  label="楼盘id"
                   name="id"
                 >
                   <Input />
@@ -43,7 +60,7 @@ const Searchpart=React.memo((props:detail)=> {
               </Col>
               <Col span={8}>
                 <Form.Item
-                  label="楼房名称"
+                  label="楼盘名称"
                   name="name"
                 >
                   <Input  />
