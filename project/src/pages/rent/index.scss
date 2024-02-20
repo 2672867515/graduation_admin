@@ -1,13 +1,30 @@
-.newhome{
+.rent{
     width: 85%;
     height: 650px;
     // background-color: rgb(252, 243, 230);
     position: absolute;
     right: 0;
-    overflow:  hidden auto;
+    overflow:  auto auto;
     padding: 10px;
     box-sizing: border-box;
     .column{
         max-width: 150px;
+    }
+    .operation{
+        width: 110px;
+    }
+    .name{
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .upload{
+        display: flex;
+        .uploaditem{
+            width: 40%;
+            background-color: aquamarine;
+            img{
+                width: 80px;
+            }
+        }
     }
 }

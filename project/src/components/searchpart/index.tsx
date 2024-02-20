@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './index.scss'
 import { Button, Col, Form, Input, Row } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { searchNewhome } from '../../api/api.ts';
+import { searchNewhome, searchRent, searchUsed } from '../../api/api.ts';
 interface detail{
   type:string;
   callback:(data)=>void
@@ -24,14 +24,21 @@ const Searchpart=React.memo((props:detail)=> {
     }
    
     if(type==='newhome'){
-      searchNewhome('newhome/searchNewhouse',data).then(res=>{
+      searchNewhome('newhome/searchNewhome',data).then(res=>{
         console.log(res.data.data);
         callback(res.data.data)
       })
     }else if(type==='used'){
-
-    }else{
       
+      searchUsed('used/searchUsed',data).then(res=>{
+        console.log(res.data.data);
+        callback(res.data.data)
+      })
+    }else{
+      searchRent('rent/searchRent',data).then(res=>{
+        console.log(res.data.data);
+        callback(res.data.data)
+      })
     }
   };
   

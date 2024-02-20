@@ -13,8 +13,9 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { addHousetype, addNewhome, deleteHousetype, deletenNewhome, getHousetype, getVrimg, getall, getimgTosee, updateHousetype, updateNewhome, updateVrimage, usedgetall } from '../../api/api.ts';
+import { addHousetype, addNewhome, addUsed, deleteHousetype, deletenNewhome, deletenUsed, getHousetype, getVrimg, getall, getimgTosee, updateHousetype, updateNewhome, updateUsed, updateVrimage, usedgetall } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
+import TextArea from 'antd/es/input/TextArea';
 const Used=(props)=> {
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
@@ -27,11 +28,8 @@ const Used=(props)=> {
   const [imageid,setImageid]=useState(-1)
   const [seeimg,setSeeimg]=useState([{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}])
   const [activeKey, setActiveKey] = useState("1");
-  const [addhousetypeurl, setAddhousetypeurl] = useState(-1);
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
-  const [form3] = Form.useForm();
-  const [form4] = Form.useForm();
   const [dataSource,setDataSource]=useState([])
   const location = useLocation();
   const { pathname } = location;
@@ -206,29 +204,24 @@ const Used=(props)=> {
     form.resetFields()
   }
 
-  const handleSwitchChange = (checked) => {
-    form.setFieldsValue({ ishot: checked });
-  };
 
   const onFinish = (values: any) => {
     setLoading(true);
     console.log('Success:', values);
-    const data={...values}
-    console.log(data);
-    // setTimeout(() => {
-    //   addNewhome('newhome/addNewhome',data).then(res=>{
-    //     setLoading(false);
-    //     setIsModalOpen(false);
-    //     messageApi.open({
-    //       type: 'success',
-    //       content: '添加成功',
-    //     });
-    //     getall('/newhome/getall').then((res)=>{
-    //       setDataSource(res.data.data)
-    //     })
-    //   })
+    setTimeout(() => {
+      addUsed('used/addUsed',values).then(res=>{
+        setLoading(false);
+        setIsModalOpen(false);
+        messageApi.open({
+          type: 'success',
+          content: '添加成功',
+        });
+        getall('used/getall').then((res)=>{
+          setDataSource(res.data.data)
+        })
+      })
       
-    // }, 1000);
+    }, 1000);
 
 
   };
@@ -289,9 +282,9 @@ const Used=(props)=> {
   const Popconfirmconfirm=(r)=>{
     console.log(r);
     console.log(type);
-    deletenNewhome('newhome/deletenNewhome',{id:r.id,type:type}).then(res=>{
+    deletenUsed('used/deletenUsed',{id:r.id}).then(res=>{
       message.success('删除成功');
-      getall('/newhome/getall').then((res)=>{
+      getall('used/getall').then((res)=>{
         setDataSource(res.data.data)
       })
     })
@@ -306,22 +299,20 @@ const Used=(props)=> {
       
     setLoading2(true);
     console.log('Success:', values);
-    const data={...values}
-    console.log(data);
-    // setTimeout(() => {
-    //   updateNewhome("newhome/updateNewhome",data).then(res=>{
-    //     setLoading2(false);
-    //     messageApi.open({
-    //       type: 'success',
-    //       content: '编辑成功',
-    //     });
-    //     getall('/newhome/getall').then((res)=>{
-    //       console.log(res);
-    //       setDataSource(res.data.data)
-    //     })
-    //   })
+    setTimeout(() => {
+      updateUsed("used/updateUsed",values).then(res=>{
+        setLoading2(false);
+        messageApi.open({
+          type: 'success',
+          content: '编辑成功',
+        });
+        usedgetall('used/getall').then((res)=>{
+          console.log(res);
+          setDataSource(res.data.data)
+        })
+      })
      
-    // }, 1000);
+    }, 1000);
 
 
   };
@@ -372,9 +363,9 @@ const Used=(props)=> {
   }
 
   return (
-    <div className='newhome'>
+    <div className='used'>
       {contextHolder}
-      <Searchpart type='newhome'  callback={handleCallback}/>
+      <Searchpart type='used'  callback={handleCallback}/>
       <Button style={{color:'rgb(82,196,26)',borderColor:'rgb(82,196,26)' ,marginTop:'20px'}} onClick={add} >添加楼盘</Button>
       <Table style={{marginTop:'10px'}} dataSource={dataSource} columns={columns} />
     
@@ -396,7 +387,7 @@ const Used=(props)=> {
         <Form
           form={form}
           name="basic"
-          labelCol={{span:4}}
+          labelCol={{span:5}}
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 500 }}
           onFinish={onFinish}
@@ -469,6 +460,20 @@ const Used=(props)=> {
               <Input  placeholder="请输入联系方式" />
             </Form.Item>
             <Form.Item
+              label="核心卖点"
+              name="sp"
+              rules={[{ required: true, message: '请输入核心卖点' }]}
+            >
+              <TextArea rows={4} placeholder="请输入核心卖点" />
+            </Form.Item>
+            <Form.Item
+              label="基本情况"
+              name="base"
+              rules={[{ required: true, message: '请输入基本情况' }]}
+            >
+                <TextArea rows={4} placeholder="请输入基本情况" />
+            </Form.Item>
+            <Form.Item
               label="精选"
               name="ishot"
             >
@@ -493,7 +498,7 @@ const Used=(props)=> {
           <Form
             form={form2}
             name="basic"
-            labelCol={{span:4}}
+            labelCol={{span:5}}
             wrapperCol={{ span: 16 }}
             style={{ maxWidth: 500 }}
             onFinish={onFinish2}
@@ -569,6 +574,20 @@ const Used=(props)=> {
               rules={[{ required: true, message: '请输入联系方式' }]}
             >
               <Input  placeholder="请输入联系方式" />
+            </Form.Item>
+            <Form.Item
+              label="核心卖点"
+              name="sp"
+              rules={[{ required: true, message: '请输入核心卖点' }]}
+            >
+              <TextArea rows={4} placeholder="请输入核心卖点" />
+            </Form.Item>
+            <Form.Item
+              label="基本情况"
+              name="base"
+              rules={[{ required: true, message: '请输入基本情况' }]}
+            >
+                <TextArea rows={4} placeholder="请输入基本情况" />
             </Form.Item>
             <Form.Item
               label="精选"

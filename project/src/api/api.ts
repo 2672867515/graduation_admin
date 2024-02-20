@@ -53,3 +53,30 @@ export const searchNewhome = (url, data) => {
 export const usedgetall = (url) => {
   return instance.get(url);
 };
+export const searchUsed = (url, data) => {
+  return instance.post(url,data);
+};
+export const addUsed = (url, data) => {
+  return instance.post(url,data);
+};
+export const updateUsed = (url, data) => {
+  return instance.post(url,data);
+};
+export const deletenUsed = (url, data) => {
+  return instance.post(url,data);
+};
+export const searchRent = (url, data) => {
+  return instance.post(url,data);
+};
+export const rentgetall = (url) => {
+  return instance.get(url);
+};
+export const addRent = (url, data) => {
+  return instance.post(url,data);
+};
+export const updateRent = (url, data) => {
+  return instance.post(url,data);
+};
+export const deletenRent = (url, data) => {
+  return instance.post(url,data);
+};
