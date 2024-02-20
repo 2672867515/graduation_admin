@@ -50,3 +50,6 @@ export const deletenNewhome = (url, data) => {
 export const searchNewhome = (url, data) => {
   return instance.post(url,data);
 };
+export const usedgetall = (url) => {
+  return instance.get(url);
+};
