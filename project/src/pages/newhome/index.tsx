@@ -33,6 +33,7 @@ const Newhome=(props)=> {
   const [seeimg,setSeeimg]=useState([{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}])
   const [activeKey, setActiveKey] = useState("1");
   const [addhousetypeurl, setAddhousetypeurl] = useState(-1);
+  const [addcover, setAddcover] = useState(-1);
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [form3] = Form.useForm();
@@ -48,6 +49,15 @@ const Newhome=(props)=> {
       title: 'id',
       dataIndex: 'id',
       key: 'id',
+    },
+    {
+      title: '封面',
+      dataIndex: 'cover',
+      key: 'cover',
+      className: 'column', 
+      render: (t,r) => (
+        <img style={{width:'80px'}} src={t||nodata} alt="" />
+        ),
     },
     {
       title: '楼盘名称',
@@ -75,7 +85,7 @@ const Newhome=(props)=> {
       className: 'column', 
     },
     {
-      title: '均价/万',
+      title: '均价/元',
       dataIndex: 'averageprice',
       key: 'averageprice',
       className: 'column', 
@@ -176,7 +186,7 @@ const Newhome=(props)=> {
       className: 'column', 
     },
     {
-      title: '单价/万',
+      title: '单价/元',
       dataIndex: 'per',
       key: 'per',
       className: 'column', 
@@ -305,6 +315,53 @@ const Newhome=(props)=> {
       }
     },
   };
+  const file4: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        form.setFieldValue('cover',info.file.response)
+        message.success(`${info.file.name} 上传成功`);
+        setAddcover(info.file.response)
+      
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
+  const file5: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        form2.setFieldValue('cover',info.file.response)
+        updateNewhome('newhome/updateNewhome',form2.getFieldsValue()).then(res=>{
+         message.success(`${info.file.name} 上传成功`);
+         getall('/newhome/getall').then((res)=>{
+          setDataSource(res.data.data)
+        })
+       
+       })
+      
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
   const initialValues = {
     ishot: false, // 设置热门开关的初始值为 false
   };
@@ -322,6 +379,7 @@ const Newhome=(props)=> {
   const add=()=>{
     setIsModalOpen(true);
     form.resetFields()
+    setAddcover(-1)
   }
   const add2=()=>{
     setIsModalOpen3(true);
@@ -424,6 +482,8 @@ const Newhome=(props)=> {
     });
     setIsModalOpen2(true)
     setHouseid(r.id)
+    console.log(r.cover);
+
     const data2={houseid:r.id,area:imagetype,type:'Newhomevr'}
     getimgTosee('image/getimgTosee',data2).then(res=>{
       console.log(res.data.data);
@@ -612,7 +672,15 @@ const Newhome=(props)=> {
           onFinishFailed={onFinishFailed}
           initialValues={initialValues}
         >
-          
+           <Form.Item
+              label="封面"
+              name="cover"
+            >
+             <Upload {...file4}>
+                    <img style={{width:"80px"}} src={addcover===-1?nodata:addcover} alt="" />
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传封面</Button>
+              </Upload>
+            </Form.Item>
           <Form.Item
             label="楼盘名称"
             name="name"
@@ -642,7 +710,7 @@ const Newhome=(props)=> {
              <Input  placeholder="请输入尺寸范围/m²" />
           </Form.Item>
           <Form.Item
-            label="均价/万"
+            label="均价/元"
             name="averageprice"
             rules={[{ required: true, message: '请输入均价' }]}
           >
@@ -715,6 +783,15 @@ const Newhome=(props)=> {
               <Input disabled placeholder="请输入楼盘名称" />
             </Form.Item>
             <Form.Item
+              label="封面"
+              name="cover"
+            >
+             <Upload {...file5}>
+                    <img style={{width:"80px"}} src={form2.getFieldValue('cover')||nodata} alt="" />
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户封面</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item
               label="楼盘名称"
               name="name"
               rules={[{ required: true, message: '请输入楼盘名称' }]}
@@ -743,7 +820,7 @@ const Newhome=(props)=> {
               <Input  placeholder="请输入尺寸范围/m²" />
             </Form.Item>
             <Form.Item
-              label="均价/万"
+              label="均价/元"
               name="averageprice"
               rules={[{ required: true, message: '请输入均价' }]}
             >
@@ -909,7 +986,7 @@ const Newhome=(props)=> {
             </Form.Item>
          
             <Form.Item
-              label="单价/万"
+              label="单价/元"
               name="per"
               rules={[{ required: true, message: '请输入单价' }]}
             >
@@ -995,7 +1072,7 @@ const Newhome=(props)=> {
             </Form.Item>
          
             <Form.Item
-              label="单价/万"
+              label="单价/元"
               name="per"
               rules={[{ required: true, message: '请输入单价' }]}
             >

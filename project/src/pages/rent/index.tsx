@@ -13,7 +13,7 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { addHousetype, addNewhome, addUsed, deleteHousetype, deletenNewhome, deletenUsed, getHousetype, getVrimg, getall, getimgTosee, rentgetall, updateHousetype, updateNewhome, updateUsed, updateVrimage, usedgetall } from '../../api/api.ts';
+import { addHousetype, addNewhome, addRent, addUsed, deleteHousetype, deletenNewhome, deletenRent, deletenUsed, getHousetype, getVrimg, getall, getimgTosee, rentgetall, updateHousetype, updateNewhome, updateRent, updateUsed, updateVrimage, usedgetall } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
 import TextArea from 'antd/es/input/TextArea';
 const Used=(props)=> {
@@ -28,11 +28,9 @@ const Used=(props)=> {
   const [imageid,setImageid]=useState(-1)
   const [seeimg,setSeeimg]=useState([{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}])
   const [activeKey, setActiveKey] = useState("1");
-  const [addhousetypeurl, setAddhousetypeurl] = useState(-1);
+  const [addcover, setAddcover] = useState(-1);
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
-  const [form3] = Form.useForm();
-  const [form4] = Form.useForm();
   const [dataSource,setDataSource]=useState([])
   const location = useLocation();
   const { pathname } = location;
@@ -42,6 +40,15 @@ const Used=(props)=> {
       title: 'id',
       dataIndex: 'id',
       key: 'id',
+    },
+    {
+      title: '封面',
+      dataIndex: 'cover',
+      key: 'cover',
+      className: 'column', 
+      render: (t,r) => (
+        <img style={{width:'80px'}} src={t||nodata} alt="" />
+        ),
     },
     {
       title: '标题',
@@ -63,27 +70,33 @@ const Used=(props)=> {
       className: 'column', 
     },
     {
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+      className: 'column', 
+    },
+    {
       title: '尺寸/m²',
       dataIndex: 'size',
       key: 'size',
       className: 'column', 
     },
     {
-      title: '总价/万',
+      title: '租金/元',
       dataIndex: 'price',
       key: 'price',
       className: 'column', 
     },
     {
-      title: '单价/万',
-      dataIndex: 'per',
-      key: 'per',
+      title: '朝向',
+      dataIndex: 'direction',
+      key: 'direction',
       className: 'column', 
     },
     {
-      title: '竣工时间',
-      dataIndex: 'jg',
-      key: 'jg',
+      title: '楼层',
+      dataIndex: 'floor',
+      key: 'floor',
       className: 'column', 
     },
     {
@@ -91,6 +104,15 @@ const Used=(props)=> {
       dataIndex: 'feature',
       key: 'feature',
       className: 'column', 
+    },
+    {
+      title: '付款方式',
+      dataIndex: 'paytype',
+      key: 'paytype',
+      className: 'column', 
+      render: (t,r) => (
+       <Tag color="magenta">{t}</Tag>
+      ),
     },
     {
       title: '联系方式',
@@ -188,7 +210,53 @@ const Used=(props)=> {
       }
     },
   };
-
+  const file2: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        form.setFieldValue('cover',info.file.response)
+        message.success(`${info.file.name} 上传成功`);
+        setAddcover(info.file.response)
+      
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
+  const file3: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        form2.setFieldValue('cover',info.file.response)
+        updateRent('rent/updateRent',form2.getFieldsValue()).then(res=>{
+         message.success(`${info.file.name} 上传成功`);
+         getall('/rent/getall').then((res)=>{
+          setDataSource(res.data.data)
+        })
+       
+       })
+      
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
   const initialValues = {
     ishot: false, // 设置热门开关的初始值为 false
   };
@@ -205,6 +273,7 @@ const Used=(props)=> {
   const add=()=>{
     setIsModalOpen(true);
     form.resetFields()
+    setAddcover(-1)
   }
 
 
@@ -212,14 +281,14 @@ const Used=(props)=> {
     setLoading(true);
     console.log('Success:', values);
     setTimeout(() => {
-      addUsed('used/addUsed',values).then(res=>{
+      addRent('rent/addRent',values).then(res=>{
         setLoading(false);
         setIsModalOpen(false);
         messageApi.open({
           type: 'success',
           content: '添加成功',
         });
-        getall('used/getall').then((res)=>{
+        rentgetall('rent/getall').then((res)=>{
           setDataSource(res.data.data)
         })
       })
@@ -285,9 +354,9 @@ const Used=(props)=> {
   const Popconfirmconfirm=(r)=>{
     console.log(r);
     console.log(type);
-    deletenUsed('used/deletenUsed',{id:r.id}).then(res=>{
+    deletenRent('rent/deletenRent',{id:r.id}).then(res=>{
       message.success('删除成功');
-      getall('used/getall').then((res)=>{
+      rentgetall('rent/getall').then((res)=>{
         setDataSource(res.data.data)
       })
     })
@@ -303,13 +372,13 @@ const Used=(props)=> {
     setLoading2(true);
     console.log('Success:', values);
     setTimeout(() => {
-      updateUsed("used/updateUsed",values).then(res=>{
+      updateRent("rent/updateRent",values).then(res=>{
         setLoading2(false);
         messageApi.open({
           type: 'success',
           content: '编辑成功',
         });
-        usedgetall('used/getall').then((res)=>{
+        rentgetall('rent/getall').then((res)=>{
           console.log(res);
           setDataSource(res.data.data)
         })
@@ -373,7 +442,7 @@ const Used=(props)=> {
       <Table style={{marginTop:'10px'}} dataSource={dataSource} columns={columns} />
     
       <Modal 
-        title="添加待租房" 
+        title="添加出租房" 
         confirmLoading={loading} 
         open={isModalOpen} 
         onCancel={()=>handleCancel()}
@@ -390,14 +459,22 @@ const Used=(props)=> {
         <Form
           form={form}
           name="basic"
-          labelCol={{span:5}}
+          labelCol={{span:4}}
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 500 }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           initialValues={initialValues}
         >
-        
+          <Form.Item
+              label="封面"
+              name="cover"
+            >
+             <Upload {...file2}>
+                    <img style={{width:"80px"}} src={addcover===-1?nodata:addcover} alt="" />
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户封面</Button>
+              </Upload>
+            </Form.Item>
             <Form.Item
               label="标题"
               name="name"
@@ -420,6 +497,13 @@ const Used=(props)=> {
               <Input  placeholder="请输入户型" />
             </Form.Item>
             <Form.Item
+              label="类型"
+              name="type"
+              rules={[{ required: true, message: '请输入类型' }]}
+            >
+              <Input  placeholder="请输入类型" />
+            </Form.Item>
+            <Form.Item
               label="尺寸/m²"
               name="size"
               rules={[{ required: true, message: '请输入尺寸' }]}
@@ -427,26 +511,26 @@ const Used=(props)=> {
               <Input  placeholder="请输入尺寸/m²" />
             </Form.Item>
             <Form.Item
-              label="总价/万"
+              label="租金/元"
               name="price"
-              rules={[{ required: true, message: '请输入总价' }]}
+              rules={[{ required: true, message: '请输入租金' }]}
             >
               <Input  placeholder="请输入总价" />
             </Form.Item>
             <Form.Item
-              label="单价/万"
-              name="per"
-              rules={[{ required: true, message: '请输入单价' }]}
+              label="朝向"
+              name="direction"
+              rules={[{ required: true, message: '请输入朝向' }]}
             >
-              <Input  placeholder="请输入单价" />
+              <Input  placeholder="请输入朝向" />
             </Form.Item>
            
             <Form.Item
-              label="竣工时间/年"
-              name="jg"
-              rules={[{ required: true, message: '请输入竣工时间' }]}
+              label="楼层"
+              name="floor"
+              rules={[{ required: true, message: '请输入楼层' }]}
             >
-              <Input  placeholder="请输入竣工时间"   />
+              <Input  placeholder="请输入楼层"  />
             </Form.Item>
             <Form.Item
               label="特色"
@@ -456,19 +540,20 @@ const Used=(props)=> {
               <Input  placeholder="请输入特色,用 , 隔开" />
             </Form.Item>
             <Form.Item
+              label="付款方式"
+              name="paytype"
+              rules={[{ required: true, message: '请输入付款方式' }]}
+            >
+              <Input  placeholder="请输入付款方式" />
+            </Form.Item>
+            <Form.Item
               label="联系方式"
               name="phone"
               rules={[{ required: true, message: '请输入联系方式' }]}
             >
               <Input  placeholder="请输入联系方式" />
             </Form.Item>
-            <Form.Item
-              label="核心卖点"
-              name="sp"
-              rules={[{ required: true, message: '请输入核心卖点' }]}
-            >
-              <TextArea rows={4} placeholder="请输入核心卖点" />
-            </Form.Item>
+
             <Form.Item
               label="基本情况"
               name="base"
@@ -501,7 +586,7 @@ const Used=(props)=> {
           <Form
             form={form2}
             name="basic"
-            labelCol={{span:5}}
+            labelCol={{span:4}}
             wrapperCol={{ span: 16 }}
             style={{ maxWidth: 500 }}
             onFinish={onFinish2}
@@ -513,6 +598,15 @@ const Used=(props)=> {
               rules={[{ required: true }]}
             >
               <Input disabled  />
+            </Form.Item>
+            <Form.Item
+              label="封面"
+              name="cover"
+            >
+             <Upload {...file3}>
+                    <img style={{width:"80px"}} src={form2.getFieldValue('cover')||nodata} alt="" />
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户封面</Button>
+              </Upload>
             </Form.Item>
             <Form.Item
               label="标题"
@@ -536,6 +630,13 @@ const Used=(props)=> {
               <Input  placeholder="请输入户型" />
             </Form.Item>
             <Form.Item
+              label="类型"
+              name="type"
+              rules={[{ required: true, message: '请输入类型' }]}
+            >
+              <Input  placeholder="请输入类型" />
+            </Form.Item>
+            <Form.Item
               label="尺寸/m²"
               name="size"
               rules={[{ required: true, message: '请输入尺寸' }]}
@@ -543,26 +644,26 @@ const Used=(props)=> {
               <Input  placeholder="请输入尺寸/m²" />
             </Form.Item>
             <Form.Item
-              label="总价/万"
+              label="租金/元"
               name="price"
-              rules={[{ required: true, message: '请输入总价' }]}
+              rules={[{ required: true, message: '请输入租金' }]}
             >
               <Input  placeholder="请输入总价" />
             </Form.Item>
             <Form.Item
-              label="单价/万"
-              name="per"
-              rules={[{ required: true, message: '请输入单价' }]}
+              label="朝向"
+              name="direction"
+              rules={[{ required: true, message: '请输入朝向' }]}
             >
-              <Input  placeholder="请输入单价" />
+              <Input  placeholder="请输入朝向" />
             </Form.Item>
            
             <Form.Item
-              label="竣工时间"
-              name="jg"
-              rules={[{ required: true, message: '请输入竣工时间' }]}
+              label="楼层"
+              name="floor"
+              rules={[{ required: true, message: '请输入楼层' }]}
             >
-              <Input disabled  />
+              <Input  placeholder="请输入楼层"  />
             </Form.Item>
             <Form.Item
               label="特色"
@@ -572,18 +673,18 @@ const Used=(props)=> {
               <Input  placeholder="请输入特色,用 , 隔开" />
             </Form.Item>
             <Form.Item
+              label="付款方式"
+              name="paytype"
+              rules={[{ required: true, message: '请输入付款方式' }]}
+            >
+              <Input  placeholder="请输入付款方式" />
+            </Form.Item>
+            <Form.Item
               label="联系方式"
               name="phone"
               rules={[{ required: true, message: '请输入联系方式' }]}
             >
               <Input  placeholder="请输入联系方式" />
-            </Form.Item>
-            <Form.Item
-              label="核心卖点"
-              name="sp"
-              rules={[{ required: true, message: '请输入核心卖点' }]}
-            >
-              <TextArea rows={4} placeholder="请输入核心卖点" />
             </Form.Item>
             <Form.Item
               label="基本情况"

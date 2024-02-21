@@ -31,6 +31,7 @@ const Used=(props)=> {
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [dataSource,setDataSource]=useState([])
+  const [addcover, setAddcover] = useState(-1);
   const location = useLocation();
   const { pathname } = location;
   let type = pathname.replace(/\//g, '')+'vr';
@@ -39,6 +40,15 @@ const Used=(props)=> {
       title: 'id',
       dataIndex: 'id',
       key: 'id',
+    },
+    {
+      title: '封面',
+      dataIndex: 'cover',
+      key: 'cover',
+      className: 'column', 
+      render: (t,r) => (
+        <img style={{width:'80px'}} src={t||nodata} alt="" />
+        ),
     },
     {
       title: '标题',
@@ -72,7 +82,7 @@ const Used=(props)=> {
       className: 'column', 
     },
     {
-      title: '单价/万',
+      title: '单价/元',
       dataIndex: 'per',
       key: 'per',
       className: 'column', 
@@ -185,7 +195,53 @@ const Used=(props)=> {
       }
     },
   };
-
+  const file2: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        form.setFieldValue('cover',info.file.response)
+        message.success(`${info.file.name} 上传成功`);
+        setAddcover(info.file.response)
+      
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
+  const file3: UploadProps = {
+    name: 'file',
+    action: 'http://127.0.0.1:8081/upload',
+    showUploadList:false,
+    headers: {
+      authorization: 'authorization-text',
+    },
+    onChange(info) {
+      if (info.file.status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === 'done') {
+        form2.setFieldValue('cover',info.file.response)
+        updateUsed('used/updateUsed',form2.getFieldsValue()).then(res=>{
+         message.success(`${info.file.name} 上传成功`);
+         getall('used/getall').then((res)=>{
+          setDataSource(res.data.data)
+        })
+       
+       })
+      
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 上传失败`);
+      }
+    },
+  };
   const initialValues = {
     ishot: false, // 设置热门开关的初始值为 false
   };
@@ -202,6 +258,7 @@ const Used=(props)=> {
   const add=()=>{
     setIsModalOpen(true);
     form.resetFields()
+    setAddcover(-1)
   }
 
 
@@ -216,7 +273,7 @@ const Used=(props)=> {
           type: 'success',
           content: '添加成功',
         });
-        getall('used/getall').then((res)=>{
+        usedgetall('used/getall').then((res)=>{
           setDataSource(res.data.data)
         })
       })
@@ -394,7 +451,15 @@ const Used=(props)=> {
           onFinishFailed={onFinishFailed}
           initialValues={initialValues}
         >
-        
+         <Form.Item
+              label="封面"
+              name="cover"
+            >
+             <Upload {...file2}>
+                    <img style={{width:"80px"}} src={addcover===-1?nodata:addcover} alt="" />
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户封面</Button>
+              </Upload>
+            </Form.Item>
             <Form.Item
               label="标题"
               name="name"
@@ -431,7 +496,7 @@ const Used=(props)=> {
               <Input  placeholder="请输入总价" />
             </Form.Item>
             <Form.Item
-              label="单价/万"
+              label="单价/元"
               name="per"
               rules={[{ required: true, message: '请输入单价' }]}
             >
@@ -512,6 +577,15 @@ const Used=(props)=> {
               <Input disabled  />
             </Form.Item>
             <Form.Item
+              label="封面"
+              name="cover"
+            >
+             <Upload {...file3}>
+                    <img style={{width:"80px"}} src={form2.getFieldValue('cover')||nodata} alt="" />
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户封面</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item
               label="标题"
               name="name"
               rules={[{ required: true, message: '请输入标题' }]}
@@ -547,7 +621,7 @@ const Used=(props)=> {
               <Input  placeholder="请输入总价" />
             </Form.Item>
             <Form.Item
-              label="单价/万"
+              label="单价/元"
               name="per"
               rules={[{ required: true, message: '请输入单价' }]}
             >
