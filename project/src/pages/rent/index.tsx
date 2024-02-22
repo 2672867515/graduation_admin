@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom';
 import './index.scss'
-import { Button, Image , Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select, Popconfirm } from 'antd';
-import type { DatePickerProps } from 'antd';
-import type { TabsProps ,UploadProps} from 'antd';
+import { Button, Image ,Checkbox, Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select, Popconfirm } from 'antd';
+import type { CheckboxProps, GetProp } from 'antd';
+import type {  UploadProps} from 'antd';
 import { useDispatch } from 'react-redux';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
@@ -13,10 +13,36 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { addHousetype, addNewhome, addRent, addUsed, deleteHousetype, deletenNewhome, deletenRent, deletenRentimg, deletenUsed, getHousetype, getVrimg, getall, getimgTosee, getrentimg, rentgetall, updateHousetype, updateNewhome, updateRent, updateUsed, updateVrimage, usedgetall } from '../../api/api.ts';
+import {  addRent,  deletenRent, deletenRentimg, getall, getrentimg, rentgetall,  updateRent, updateVrimage, usedgetall } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
 import TextArea from 'antd/es/input/TextArea';
+
+type CheckboxValueType = GetProp<typeof Checkbox.Group, 'value'>[number];
+const CheckboxGroup = Checkbox.Group;
+const plainOptions = [ 
+{ label: '电视', value: 0 },
+{ label: '空调', value: 1 },
+{ label: '衣柜', value: 2 },
+{ label: '床', value: 3 },
+{ label: '卫生间', value: 4 },
+{ label: '智能门锁', value: 5 },
+{ label: '阳台', value: 6 },
+{ label: '暖气', value: 7 },
+
+];
+const plainOptions2 = [
+{ label: '冰箱', value: 0 },
+{ label: '洗衣机', value: 1 },
+{ label: '热水器', value: 2 },
+{ label: '宽带', value: 3 },
+{ label: '沙发', value: 4 },
+{ label: '油烟机', value: 5 },
+{ label: '燃气灶', value: 6 },
+{ label: '可做饭', value: 7 }
+];
+
 const Used=(props)=> {
+
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,7 +50,6 @@ const Used=(props)=> {
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [houseid,setHouseid]=useState()
   const [images,setImages]=useState([])
-  const [seeimg,setSeeimg]=useState([])
   const [activeKey, setActiveKey] = useState("1");
   const [addcover, setAddcover] = useState(-1);
   const [form] = Form.useForm();
@@ -243,14 +268,18 @@ const Used=(props)=> {
     setIsModalOpen(true);
     form.resetFields()
     setAddcover(-1)
+    form.setFieldValue('bedroomeqs',[10])
+    form.setFieldValue('publiceqs',[10])
   }
 
 
   const onFinish = (values: any) => {
     setLoading(true);
     console.log('Success:', values);
+    let data={...values,bedroomeqs:values.bedroomeqs.toString(),publiceqs:values.publiceqs.toString()}
+    
     setTimeout(() => {
-      addRent('rent/addRent',values).then(res=>{
+      addRent('rent/addRent',data).then(res=>{
         setLoading(false);
         setIsModalOpen(false);
         messageApi.open({
@@ -280,10 +309,11 @@ const Used=(props)=> {
   const doedit=(r)=>{
     setActiveKey("1")
     console.log(r);
-    const data={...r,ishot:r.ishot==='true'?true:false}
+    const data={...r,ishot:r.ishot==='true'?true:false,bedroomeqs: r.bedroomeqs===''?[10]:r.bedroomeqs.match(/\d+/g).map(Number),publiceqs: r.publiceqs===''?[10]:r.publiceqs.match(/\d+/g).map(Number)}
     Object.keys(data).forEach(key => {
       form2.setFieldValue(key, data[key]);
     });
+
     setIsModalOpen2(true)
     setHouseid(r.id)
     const data2={houseid:r.id,type:'Rent'}
@@ -331,8 +361,9 @@ const Used=(props)=> {
       
     setLoading2(true);
     console.log('Success:', values);
+    let data={...values,bedroomeqs:values.bedroomeqs.toString(),publiceqs:values.publiceqs.toString()}
     setTimeout(() => {
-      updateRent("rent/updateRent",values).then(res=>{
+      updateRent("rent/updateRent",data).then(res=>{
         setLoading2(false);
         messageApi.open({
           type: 'success',
@@ -352,16 +383,7 @@ const Used=(props)=> {
     console.log('meaasgeFailed:', errorInfo);
   };
 
-  // const up=(d)=>{
-  //   setDirection(d)
-  //   const data={houseid:houseid,area:imagetype,direction:d,type:'Rentvr'}
-  //   getVrimg('image/getVrimg',data).then(res=>{
-  //     console.log(res);
-  //     if(res.data.data.length>0){
-  //       setImageid(res.data.data[0].id)
-  //     }
-  //   })
-  // }
+
 
   return (
     <div className='rent'>
@@ -496,6 +518,18 @@ const Used=(props)=> {
             >
                 <Switch checkedChildren="精选" unCheckedChildren="普通"  defaultChecked={false} />
             </Form.Item>
+            <Form.Item
+              label="卧室设施"
+              name="bedroomeqs"
+            >
+              <Checkbox.Group options={plainOptions}  />       
+           </Form.Item>
+            <Form.Item
+              label="公共设施"
+              name="publiceqs"
+            >
+              <Checkbox.Group options={plainOptions2}   />     
+             </Form.Item>
         </Form>
       </Modal>
       <Modal 
@@ -628,6 +662,18 @@ const Used=(props)=> {
             >
                 <Switch checkedChildren="精选" unCheckedChildren="普通" defaultChecked={false} />
             </Form.Item>
+            <Form.Item
+              label="卧室设施"
+              name="bedroomeqs"
+            >
+              <Checkbox.Group options={plainOptions} />       
+           </Form.Item>
+            <Form.Item
+              label="公共设施"
+              name="publiceqs"
+            >
+              <Checkbox.Group options={plainOptions2}  />     
+             </Form.Item>
             <Form.Item wrapperCol={{ offset: 10, span: 5 }}>
               <Button loading={loading2} type="primary" htmlType="submit">
                 提交
@@ -635,8 +681,7 @@ const Used=(props)=> {
             </Form.Item>
           </Form>
           </TabPane>
-          <TabPane tab="实拍图" key="2">
-          <div style={{  fontSize: '18px',fontWeight: "bold",marginBottom:'10px'}}>最多上传十张实拍图</div>
+          <TabPane  tab="实拍图" key="2">
               {images.map(item=>{
                 return (
                   <div  style={{marginBottom:'10px',marginRight:'10px',display:'inline-block'}}>
@@ -654,7 +699,6 @@ const Used=(props)=> {
                   </Popconfirm>
 
                 </div>
-                  //  <img style={{width:'100px',marginRight:'10px'}} src={item.url} alt="" />
                 )
               })}
               {images.length<10&&  <Upload {...file}>
