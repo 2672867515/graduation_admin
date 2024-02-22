@@ -8,7 +8,11 @@
     padding: 10px;
     box-sizing: border-box;
     .column{
-        max-width: 120px;
+        max-width: 150px;
+        min-width: 80px;
+    }
+    .column2{
+        width: 100px;
     }
     .operation{
         width: 80px;
@@ -17,14 +21,9 @@
         font-size: 20px;
         font-weight: bold;
     }
-    .upload{
+    .imgs{
+        background-color: aquamarine;
         display: flex;
-        .uploaditem{
-            width: 40%;
-            background-color: aquamarine;
-            img{
-                width: 80px;
-            }
-        }
+        gap: 100px;
     }
 }

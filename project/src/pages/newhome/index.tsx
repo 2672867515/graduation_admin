@@ -82,7 +82,7 @@ const Newhome=(props)=> {
       title: '尺寸范围/m²',
       dataIndex: 'size',
       key: 'size',
-      className: 'column', 
+      className: 'column2', 
     },
     {
       title: '均价/元',

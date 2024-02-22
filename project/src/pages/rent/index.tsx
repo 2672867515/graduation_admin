@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom';
 import './index.scss'
-import { Button, DatePicker, Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select, Popconfirm } from 'antd';
+import { Button, Image , Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select, Popconfirm } from 'antd';
 import type { DatePickerProps } from 'antd';
 import type { TabsProps ,UploadProps} from 'antd';
 import { useDispatch } from 'react-redux';
@@ -13,7 +13,7 @@ import {
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
 import Searchpart from '../../components/searchpart/index.tsx'
-import { addHousetype, addNewhome, addRent, addUsed, deleteHousetype, deletenNewhome, deletenRent, deletenUsed, getHousetype, getVrimg, getall, getimgTosee, rentgetall, updateHousetype, updateNewhome, updateRent, updateUsed, updateVrimage, usedgetall } from '../../api/api.ts';
+import { addHousetype, addNewhome, addRent, addUsed, deleteHousetype, deletenNewhome, deletenRent, deletenRentimg, deletenUsed, getHousetype, getVrimg, getall, getimgTosee, getrentimg, rentgetall, updateHousetype, updateNewhome, updateRent, updateUsed, updateVrimage, usedgetall } from '../../api/api.ts';
 import TabPane from 'antd/es/tabs/TabPane';
 import TextArea from 'antd/es/input/TextArea';
 const Used=(props)=> {
@@ -22,11 +22,9 @@ const Used=(props)=> {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading2, setLoading2] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
-  const [imagetype,setImagetype]=useState('客厅')
   const [houseid,setHouseid]=useState()
-  const [direction,setDirection]=useState('')
-  const [imageid,setImageid]=useState(-1)
-  const [seeimg,setSeeimg]=useState([{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}])
+  const [images,setImages]=useState([])
+  const [seeimg,setSeeimg]=useState([])
   const [activeKey, setActiveKey] = useState("1");
   const [addcover, setAddcover] = useState(-1);
   const [form] = Form.useForm();
@@ -79,7 +77,7 @@ const Used=(props)=> {
       title: '尺寸/m²',
       dataIndex: 'size',
       key: 'size',
-      className: 'column', 
+      className: 'column2', 
     },
     {
       title: '租金/元',
@@ -164,47 +162,18 @@ const Used=(props)=> {
         console.log(info.file, info.fileList);
       }
       if (info.file.status === 'done') {
-        console.log("imageid:"+imageid);
-        let temp=[...seeimg]
-       
-        switch (direction) {
-          case "f":
-            temp[0].url=info.file.response
-            break;
-          case "ba":
-            temp[1].url=info.file.response
-            break;
-          case "l":
-            temp[2].url=info.file.response
-            break;
-          case "r":
-            temp[3].url=info.file.response
-            break;
-          case "t":
-            temp[4].url=info.file.response
-            break;
-          case "bo":
-            temp[5].url=info.file.response
-            break;
 
-          default:
-            break;
-        }
-        console.log(temp);
-        
-        setSeeimg(temp)
-        let data={}
-        if(imageid!=-1){
-          data={id:imageid,houseid:houseid,url:info.file.response,area:imagetype,direction:direction,type:'Rentvr'}
-
-        }else{
-          data={id:-1,houseid:houseid,url:info.file.response,area:imagetype,direction:direction,type:'Rentvr'}
-        }
+        let data={id:-1,houseid:houseid,url:info.file.response,area:1,direction:1,type:'Rent'}
         updateVrimage('/image/updateVrimage',data).then(res=>{
-          console.log(res);
+          
           message.success(`${info.file.name} 上传${res.data.msg}`);
-          setImageid(-1)
+          const data2={houseid:houseid,type:'Rent'}
+          getrentimg('image/getrentimg',data2).then(res=>{
+            console.log(res.data.data);
+            setImages(res.data.data)
+          })
         })
+      
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} 上传失败`);
       }
@@ -317,33 +286,12 @@ const Used=(props)=> {
     });
     setIsModalOpen2(true)
     setHouseid(r.id)
-    const data2={houseid:r.id,area:imagetype,type:'Rentvr'}
-    getimgTosee('image/getusedimgTosee',data2).then(res=>{
+    const data2={houseid:r.id,type:'Rent'}
+    getrentimg('image/getrentimg',data2).then(res=>{
       console.log(res.data.data);
-      let temp=[{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}]
-      res.data.data.forEach((item)=>{
-        if(item.direction==='f'){
-          temp[0]=item
-        }
-        if(item.direction==='ba'){
-          temp[1]=item
-        }
-        if(item.direction==='l'){
-          temp[2]=item
-        }
-        if(item.direction==='r'){
-          temp[3]=item
-        }
-        if(item.direction==='t'){
-          temp[4]=item
-        }
-        if(item.direction==='bo'){
-          temp[5]=item
-        }
-      })
-      console.log(temp);
-      setSeeimg(temp)
+      setImages(res.data.data)
     })
+ 
   }
 
   
@@ -358,6 +306,18 @@ const Used=(props)=> {
       message.success('删除成功');
       rentgetall('rent/getall').then((res)=>{
         setDataSource(res.data.data)
+      })
+    })
+    
+  }
+  const Popconfirmconfirm2=(r)=>{
+    console.log(r);
+    deletenRentimg('image/deletenRentimg',{id:r.id}).then(res=>{
+      message.success('删除成功');
+      const data={houseid:r.houseid,type:'Rent'}
+      getrentimg('image/getrentimg',data).then(res=>{
+        console.log(res.data.data);
+        setImages(res.data.data)
       })
     })
     
@@ -391,48 +351,17 @@ const Used=(props)=> {
   const onFinishFailed2 = (errorInfo: any) => {
     console.log('meaasgeFailed:', errorInfo);
   };
-  const selecthandleChange = (value: string) => {
-    console.log(`selected ${value}`);
-    setImagetype(value)
-    let data={houseid:houseid,area:value,type:'Rentvr'}
-    getimgTosee('image/getimgTosee',data).then(res=>{
-      console.log(res);
-      let temp=[{url:''},{url:''},{url:''},{url:''},{url:''},{url:''}]
-      res.data.data.forEach((item)=>{
-        if(item.direction==='f'){
-          temp[0]=item
-        }
-        if(item.direction==='ba'){
-          temp[1]=item
-        }
-        if(item.direction==='l'){
-          temp[2]=item
-        }
-        if(item.direction==='r'){
-          temp[3]=item
-        }
-        if(item.direction==='t'){
-          temp[4]=item
-        }
-        if(item.direction==='bo'){
-          temp[5]=item
-        }
-      })
-      console.log(temp);
-      
-      setSeeimg(temp)
-    })
-  };
-  const up=(d)=>{
-    setDirection(d)
-    const data={houseid:houseid,area:imagetype,direction:d,type:'Rentvr'}
-    getVrimg('image/getVrimg',data).then(res=>{
-      console.log(res);
-      if(res.data.data.length>0){
-        setImageid(res.data.data[0].id)
-      }
-    })
-  }
+
+  // const up=(d)=>{
+  //   setDirection(d)
+  //   const data={houseid:houseid,area:imagetype,direction:d,type:'Rentvr'}
+  //   getVrimg('image/getVrimg',data).then(res=>{
+  //     console.log(res);
+  //     if(res.data.data.length>0){
+  //       setImageid(res.data.data[0].id)
+  //     }
+  //   })
+  // }
 
   return (
     <div className='rent'>
@@ -706,52 +635,33 @@ const Used=(props)=> {
             </Form.Item>
           </Form>
           </TabPane>
-          <TabPane tab="VR素材" key="2">
-            <Select
-              defaultValue="客厅"
-              style={{ width: 120 }}
-              onChange={selecthandleChange}
-              options={[
-                { value: '客厅', label: '客厅' },
-                { value: '主卧', label: '主卧' },
-                { value: '次卧', label: '次卧' },
-                { value: '卫生间', label: '卫生间' },
-              ]}
-            />
-            <br />
-            <br />
-              <Upload {...file}>
-                    <img style={{width:'80px'}} src={seeimg[0]?.url||nodata} alt="" />
-                    <Button size='small' onClick={()=>up('f')} icon={<UploadOutlined />}>上传正面</Button>
+          <TabPane tab="实拍图" key="2">
+          <div style={{  fontSize: '18px',fontWeight: "bold",marginBottom:'10px'}}>最多上传十张实拍图</div>
+              {images.map(item=>{
+                return (
+                  <div  style={{marginBottom:'10px',marginRight:'10px',display:'inline-block'}}>
+                    <Image
+                    width={90}
+                    src={item.url}
+                  />
+                  <Popconfirm
+                    title="确认删除？"
+                    onConfirm={()=>Popconfirmconfirm2(item)}
+                    okText="确认"
+                    cancelText="取消"
+                  >
+                    <Tag color="red">删除</Tag>
+                  </Popconfirm>
+
+                </div>
+                  //  <img style={{width:'100px',marginRight:'10px'}} src={item.url} alt="" />
+                )
+              })}
+              {images.length<10&&  <Upload {...file}>
+                    <Button size='small' icon={<UploadOutlined />}>上传实拍图</Button>
               </Upload>
-             <br /><br />
-            <Upload {...file}>
-                    <img style={{width:'80px'}} src={seeimg[1]?.url||nodata} alt="" />
-                    <Button size='small' onClick={()=>up('ba')} icon={<UploadOutlined />}>上传后面</Button>
-              </Upload>
-             <br /><br />
-            <Upload {...file}>
-                    <img style={{width:'80px'}} src={seeimg[2]?.url||nodata} alt="" />
-                    <Button size='small' onClick={()=>up('l')} icon={<UploadOutlined />}>上传左面</Button>
-              </Upload> 
-              <br />
-             <br />
-            <Upload {...file}>
-                    <img style={{width:'80px'}} src={seeimg[3]?.url||nodata} alt="" />
-                    <Button size='small' onClick={()=>up('r')} icon={<UploadOutlined />}>上传右面</Button>
-              </Upload> 
-              <br />
-             <br />
-            <Upload {...file}>
-                    <img style={{width:'80px'}} src={seeimg[4]?.url||nodata} alt="" />
-                    <Button size='small' onClick={()=>up('t')} icon={<UploadOutlined />}>上传上面</Button>
-              </Upload>
-              <br />
-             <br />
-            <Upload {...file}>
-                    <img style={{width:'80px'}} src={seeimg[5]?.url||nodata} alt="" />
-                    <Button size='small' onClick={()=>up('bo')} icon={<UploadOutlined />}>上传下面</Button>
-              </Upload>
+              }
+            
           
           </TabPane>
         </Tabs>

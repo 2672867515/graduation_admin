@@ -73,7 +73,7 @@ const Used=(props)=> {
       title: '尺寸/m²',
       dataIndex: 'size',
       key: 'size',
-      className: 'column', 
+      className: 'column2', 
     },
     {
       title: '总价/万',
@@ -91,7 +91,7 @@ const Used=(props)=> {
       title: '竣工时间',
       dataIndex: 'jg',
       key: 'jg',
-      className: 'column', 
+      className: 'column2', 
     },
     {
       title: '特色',
@@ -423,7 +423,7 @@ const Used=(props)=> {
     <div className='used'>
       {contextHolder}
       <Searchpart type='used'  callback={handleCallback}/>
-      <Button style={{color:'rgb(82,196,26)',borderColor:'rgb(82,196,26)' ,marginTop:'20px'}} onClick={add} >添加楼盘</Button>
+      <Button style={{color:'rgb(82,196,26)',borderColor:'rgb(82,196,26)' ,marginTop:'20px'}} onClick={add} >添加二手房</Button>
       <Table style={{marginTop:'10px'}} dataSource={dataSource} columns={columns} />
     
       <Modal 
