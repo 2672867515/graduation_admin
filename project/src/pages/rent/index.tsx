@@ -238,6 +238,8 @@ const Used=(props)=> {
       }
       if (info.file.status === 'done') {
         form2.setFieldValue('cover',info.file.response)
+        form2.setFieldValue('bedroomeqs',form2.getFieldValue('bedroomeqs').toString())
+        form2.setFieldValue('publiceqs',form2.getFieldValue('publiceqs').toString())
         updateRent('rent/updateRent',form2.getFieldsValue()).then(res=>{
          message.success(`${info.file.name} 上传成功`);
          getall('/rent/getall').then((res)=>{
@@ -255,7 +257,7 @@ const Used=(props)=> {
     ishot: false, // 设置热门开关的初始值为 false
   };
   useEffect(()=>{
-    rentgetall('rent/getall').then((res)=>{
+    getall('rent/getall').then((res)=>{
       console.log(res);
       setDataSource(res.data.data)
     })
@@ -268,8 +270,8 @@ const Used=(props)=> {
     setIsModalOpen(true);
     form.resetFields()
     setAddcover(-1)
-    form.setFieldValue('bedroomeqs',[10])
-    form.setFieldValue('publiceqs',[10])
+    form.setFieldValue('bedroomeqs',[0,1,2,3,4,5,6,7])
+    form.setFieldValue('publiceqs',[0,1,2,3,4,5,6,7])
   }
 
 
@@ -286,7 +288,7 @@ const Used=(props)=> {
           type: 'success',
           content: '添加成功',
         });
-        rentgetall('rent/getall').then((res)=>{
+        getall('rent/getall').then((res)=>{
           setDataSource(res.data.data)
         })
       })
@@ -334,7 +336,7 @@ const Used=(props)=> {
     console.log(type);
     deletenRent('rent/deletenRent',{id:r.id}).then(res=>{
       message.success('删除成功');
-      rentgetall('rent/getall').then((res)=>{
+      getall('rent/getall').then((res)=>{
         setDataSource(res.data.data)
       })
     })
@@ -362,6 +364,8 @@ const Used=(props)=> {
     setLoading2(true);
     console.log('Success:', values);
     let data={...values,bedroomeqs:values.bedroomeqs.toString(),publiceqs:values.publiceqs.toString()}
+    console.log(data);
+    
     setTimeout(() => {
       updateRent("rent/updateRent",data).then(res=>{
         setLoading2(false);
@@ -369,7 +373,7 @@ const Used=(props)=> {
           type: 'success',
           content: '编辑成功',
         });
-        rentgetall('rent/getall').then((res)=>{
+        getall('rent/getall').then((res)=>{
           console.log(res);
           setDataSource(res.data.data)
         })
@@ -522,7 +526,7 @@ const Used=(props)=> {
               label="卧室设施"
               name="bedroomeqs"
             >
-              <Checkbox.Group options={plainOptions}  />       
+              <Checkbox.Group options={plainOptions} />       
            </Form.Item>
             <Form.Item
               label="公共设施"

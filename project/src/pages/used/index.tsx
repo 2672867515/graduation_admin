@@ -246,7 +246,7 @@ const Used=(props)=> {
     ishot: false, // 设置热门开关的初始值为 false
   };
   useEffect(()=>{
-    usedgetall('used/getall').then((res)=>{
+    getall('used/getall').then((res)=>{
       console.log(res);
       setDataSource(res.data.data)
     })
@@ -273,7 +273,7 @@ const Used=(props)=> {
           type: 'success',
           content: '添加成功',
         });
-        usedgetall('used/getall').then((res)=>{
+        getall('used/getall').then((res)=>{
           setDataSource(res.data.data)
         })
       })
@@ -363,7 +363,7 @@ const Used=(props)=> {
           type: 'success',
           content: '编辑成功',
         });
-        usedgetall('used/getall').then((res)=>{
+        getall('used/getall').then((res)=>{
           console.log(res);
           setDataSource(res.data.data)
         })
