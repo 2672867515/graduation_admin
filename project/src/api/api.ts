@@ -86,3 +86,6 @@ export const getrentimg = (url, data) => {
 export const deletenRentimg = (url, data) => {
   return instance.post(url,data);
 };
+export const getallhouseqa = (url) => {
+  return instance.post(url);
+};

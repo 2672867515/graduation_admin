@@ -62,7 +62,7 @@ const Searchpart=React.memo((props:detail)=> {
                   label="楼盘id"
                   name="id"
                 >
-                  <Input />
+                  <Input  placeholder="请输入楼盘id" />
                 </Form.Item>
               </Col>
               <Col span={8}>
@@ -70,7 +70,7 @@ const Searchpart=React.memo((props:detail)=> {
                   label="楼盘名称"
                   name="name"
                 >
-                  <Input  />
+                  <Input  placeholder="请输入楼盘名称" />
                 </Form.Item>
               </Col>
               <Col span={2}>
