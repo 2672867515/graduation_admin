@@ -9,7 +9,7 @@ import {
     SearchOutlined
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
-import {  addRent,  deleteQa,  deletenRent, deletenRentimg, getall, getallhouseqa, searchQa } from '../../api/api.ts';
+import {  addRent,  deleteQa,  getallhouseqa, searchQa } from '../../api/api.ts';
 
 
 const Question=(props)=> {
