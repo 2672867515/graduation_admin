@@ -9,7 +9,7 @@ import {
     SearchOutlined
 } from '@ant-design/icons';
 import { UploadOutlined } from '@ant-design/icons';
-import {  addRent,  deletenRent, deletenRentimg, getall, getallhouseqa } from '../../api/api.ts';
+import {  addRent,  deleteQa,  deletenRent, deletenRentimg, getall, getallhouseqa, searchQa } from '../../api/api.ts';
 
 
 const Question=(props)=> {
@@ -25,6 +25,12 @@ const Question=(props)=> {
       title: 'id',
       dataIndex: 'id',
       key: 'id',
+    },
+    {
+      title: '房屋id',
+      dataIndex: 'houseid',
+      key: 'houseid',
+      className: 'column', 
     },
     {
         title: '房源类型',
@@ -72,7 +78,7 @@ const Question=(props)=> {
       key: 'answe',
       className: 'column', 
       render: (t,r) => (
-        r.answer.slice(0,5).map(item=><div className='tag' >{item.content} <br /></div>)
+        r.answer.length>0? r.answer.slice(0,5).map(item=><div className='tag' >{item.content}</div>):<Tag color='red' >暂无回答</Tag>
        ),
     },
     {
@@ -108,8 +114,6 @@ const Question=(props)=> {
 
   useEffect(()=>{
     getallhouseqa('question/getallhouseqa').then(res=>{
-        console.log(res.data.data);
-        
         setDataSource(res.data.data.sort((a, b) =>{
           const dateA = new Date(a.time+ 'T00:00:00');
           const dateB = new Date(b.time+ 'T00:00:00');
@@ -125,16 +129,21 @@ const Question=(props)=> {
   const onFinish = (values: any) => {
     console.log('Success:', values);
     let data={content:values.content,type:values.type}
-    if(!values.content){
+    if(values.content===''){
         
       data.content=null
     }
-    if(!values.type){
+    if(values.type===''){
         
       data.content=null
     }
-
-   
+    searchQa('question/searchQa',data).then(res=>{
+      setDataSource(res.data.data.sort((a, b) =>{
+        const dateA = new Date(a.time+ 'T00:00:00');
+        const dateB = new Date(b.time+ 'T00:00:00');
+        return dateB - dateA; // 从近到远排序
+      }))
+    })
    
   };
   
@@ -145,10 +154,16 @@ const Question=(props)=> {
   const Popconfirmconfirm=(r)=>{
     console.log(r);
     console.log(type);
-    deletenRent('rent/deletenRent',{id:r.id}).then(res=>{
+    deleteQa('question/deleteQa',{id:r.id}).then(res=>{
+      console.log(res);
+      
       message.success('删除成功');
-      getall('rent/getall').then((res)=>{
-        setDataSource(res.data.data)
+      getallhouseqa('question/getallhouseqa').then(res=>{
+        setDataSource(res.data.data.sort((a, b) =>{
+          const dateA = new Date(a.time+ 'T00:00:00');
+          const dateB = new Date(b.time+ 'T00:00:00');
+          return dateB - dateA; // 从近到远排序
+        }))
       })
     })
     
