@@ -13,7 +13,7 @@ const  Login=(props)=> {
   const onFinish = (values: any) => {
     console.log('Success:', values);
 
-    tologin('/user/login',values).then((res)=>{
+    tologin('/user/adminlogin',values).then((res)=>{
       console.log(res.data);
       if(res.data.code===0){
         message.success('登录成功');

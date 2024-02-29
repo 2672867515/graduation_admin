@@ -17,6 +17,12 @@ export const updateHead = (url, data) => {
 export const getuser = (url, data) => {
   return instance.post(url,data);
 };
+export const deleteuser = (url, data) => {
+  return instance.post(url,data);
+};
+export const getbyusername = (url, data) => {
+  return instance.post(url,data);
+};
 export const updateVrimage = (url, data) => {
   return instance.post(url,data);
 };
