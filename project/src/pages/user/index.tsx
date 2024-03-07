@@ -60,7 +60,7 @@ const User=(props)=> {
           okText="确认"
           cancelText="取消"
         >
-          <a >删除</a>
+          {r.isadmin==='0'&&<a>删除</a>}
         </Popconfirm>
         </div>
         ),

@@ -475,15 +475,12 @@ const Newhome=(props)=> {
 
   const doedit=(r)=>{
     setActiveKey("1")
-    console.log(r);
     const data={...r,ishot:r.ishot==='true'?true:false,kp:moment(r.kp),jf:moment(r.jf)}
     Object.keys(data).forEach(key => {
       form2.setFieldValue(key, data[key]);
     });
     setIsModalOpen2(true)
     setHouseid(r.id)
-    console.log(r.cover);
-
     const data2={houseid:r.id,area:imagetype,type:'Newhomevr'}
     getimgTosee('image/getimgTosee',data2).then(res=>{
       console.log(res.data.data);
@@ -508,7 +505,6 @@ const Newhome=(props)=> {
           temp[5]=item
         }
       })
-      console.log(temp);
       setSeeimg(temp)
     })
   }
@@ -788,7 +784,7 @@ const Newhome=(props)=> {
             >
              <Upload {...file5}>
                     <img style={{width:"80px"}} src={form2.getFieldValue('cover')||nodata} alt="" />
-                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户封面</Button>
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传封面</Button>
               </Upload>
             </Form.Item>
             <Form.Item

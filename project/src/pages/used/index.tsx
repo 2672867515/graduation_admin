@@ -175,8 +175,7 @@ const Used=(props)=> {
           default:
             break;
         }
-        console.log(temp);
-        
+
         setSeeimg(temp)
         let data={}
         if(imageid!=-1){
@@ -457,7 +456,7 @@ const Used=(props)=> {
             >
              <Upload {...file2}>
                     <img style={{width:"80px"}} src={addcover===-1?nodata:addcover} alt="" />
-                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户封面</Button>
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传封面</Button>
               </Upload>
             </Form.Item>
             <Form.Item
@@ -582,7 +581,7 @@ const Used=(props)=> {
             >
              <Upload {...file3}>
                     <img style={{width:"80px"}} src={form2.getFieldValue('cover')||nodata} alt="" />
-                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传户封面</Button>
+                    <br /><br /><Button size='small' icon={<UploadOutlined />}>上传封面</Button>
               </Upload>
             </Form.Item>
             <Form.Item
