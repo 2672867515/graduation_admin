@@ -685,6 +685,8 @@ const Used=(props)=> {
                 { value: '主卧', label: '主卧' },
                 { value: '次卧', label: '次卧' },
                 { value: '卫生间', label: '卫生间' },
+                { value: '厨房', label: '厨房' },
+                { value: '阳台', label: '阳台' },
               ]}
             />
             <br />

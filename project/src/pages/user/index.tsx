@@ -97,7 +97,6 @@ const User=(props)=> {
   
   
   const Popconfirmconfirm=(r)=>{
-    console.log(r);
     deleteuser('user/deleteuser',{id:r.id}).then(res=>{
       message.success('删除成功');
       getall('user/getall').then((res)=>{
