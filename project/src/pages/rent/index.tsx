@@ -70,7 +70,7 @@ const Used=(props)=> {
       key: 'cover',
       className: 'column', 
       render: (t,r) => (
-        <img style={{width:'80px'}} src={t||nodata} alt="" />
+        <Image width={80} src={t||nodata} />
         ),
     },
     {

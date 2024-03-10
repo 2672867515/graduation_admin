@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom';
 import './index.scss'
-import { Button, DatePicker, Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select, Popconfirm } from 'antd';
+import { Button, Image, Form, Input, message, Modal, Switch, Table, Tag, Upload ,Tabs, Select, Popconfirm } from 'antd';
 import type { DatePickerProps } from 'antd';
 import type { TabsProps ,UploadProps} from 'antd';
 import { useDispatch } from 'react-redux';
@@ -47,7 +47,7 @@ const Used=(props)=> {
       key: 'cover',
       className: 'column', 
       render: (t,r) => (
-        <img style={{width:'80px'}} src={t||nodata} alt="" />
+        <Image width={80} src={t||nodata} />
         ),
     },
     {
